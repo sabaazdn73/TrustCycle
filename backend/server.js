@@ -194,7 +194,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
         from: process.env.EMAIL_FROM || 'onboarding@resend.dev', 
         to: email,
         subject: 'TrustCycle Verification Code',
-        html: `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`
+        html: `<p>Your verification code is: <strong>${otp}</strong></p>`
         });
         res.json({ success: true, message: "Email sent", demoOTP: otp });
     } else {
@@ -362,7 +362,7 @@ app.get('/api/verify/:id', async (req, res) => {
 ====================================================== */
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0' , () => {
   console.log(`🚀 TrustCycle Backend is live on port ${PORT}`);
   console.log(`🔗 Connected to IOTA Node`);
 });
