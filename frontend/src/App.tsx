@@ -161,7 +161,7 @@ export default function App() {
       });
       const data = await res.json(); // Fixed: Defined data here
       if (res.ok) {
-        if(data.demoOtp) setDemoOtp(data.demoOtp);
+        if(data.demoOTP || data.demoOtp) setDemoOtp(data.demoOTP || data.demoOtp);
         setStatusMsg('OTP sent! For demo purposes, you can see it below.');
       }
     } catch (e) {
