@@ -8,7 +8,6 @@ const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
 const { Resend } = require('resend');
 const cors = require('cors');
-var otpStore = {};
 
 const app = express();
 app.use(express.json());
