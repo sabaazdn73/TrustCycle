@@ -8,6 +8,7 @@ const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
 const { Resend } = require('resend');
 const cors = require('cors');
+var otpStore = {};
 
 const app = express();
 app.use(express.json());
@@ -196,9 +197,9 @@ app.post('/api/auth/send-otp', async (req, res) => {
         subject: 'TrustCycle Verification Code',
         html: `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`
         });
-        res.json({ success: true, message: "Email sent" });
+        res.json({ success: true, message: "Email sent", demoOTP: otp });
     } else {
-        res.json({ success: true, message: "OTP logged to console (Dev Mode)" });
+        res.json({ success: true, message: "OTP logged to console (Dev Mode)", demoOTP: otp });
     }
   } catch (err) {
     console.error("Email Error:", err);
@@ -213,7 +214,7 @@ app.post('/api/auth/verify-otp', (req, res) => {
     return res.status(401).json({ error: 'Invalid or expired OTP' });
   }
   delete otpStore[email];
-  res.json({ success: true });
+  res.json({ message: 'OTP verified'});
 });
 
 /* ======================================================

@@ -63,12 +63,12 @@ const BackgroundGlobe = () => {
 
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
+  const [demoOtp, setDemoOtp] = useState<string>(''); // Fixed naming to demoOtp
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [issuedRef, setIssuedRef] = useState<string>('');
   const [identity, setIdentity] = useState<{ fullName: string, title?: string, photo?: string, org?: string, verifiedAcademic?: boolean } | null>(null);
   
-  // 1️⃣ Adjustment: canProceed state
   const [canProceed, setCanProceed] = useState(false);
 
   const [studentName, setStudentName] = useState('');
@@ -79,7 +79,6 @@ export default function App() {
   const [searchRes, setSearchRes] = useState<any[]>([]);
   const [selectedRec, setSelectedRec] = useState<any>(null);
 
-  // professor inputs
   const [emailInput, setEmailInput] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
   const [otpInput, setOtpInput] = useState('');
@@ -111,7 +110,6 @@ export default function App() {
     transition: '0.2s opacity'
   });
 
-  // ------ API calls ------
   const handleAdminWhitelist = async (action: 'add' | 'delete') => {
     setLoading(true);
     try {
@@ -157,11 +155,15 @@ export default function App() {
   const sendOtp = async () => {
     setLoading(true);
     try {
-      await fetch('https://trustcycle-drs.onrender.com/api/auth/send-otp', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/send-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
-      setStatusMsg('OTP sent (check backend terminal for demo OTP).');
+      const data = await res.json(); // Fixed: Defined data here
+      if (res.ok) {
+        if(data.demoOtp) setDemoOtp(data.demoOtp);
+        setStatusMsg('OTP sent! For demo purposes, you can see it below.');
+      }
     } catch (e) {
       setStatusMsg('OTP send failed.');
     } finally {
@@ -177,6 +179,7 @@ export default function App() {
         body: JSON.stringify({ email: emailInput, otp: otpInput })
       });
       if (res.ok) {
+        setDemoOtp(''); // Clear demo otp on success
         setStep(3);
       } else {
         const e = await res.json();
@@ -196,7 +199,7 @@ export default function App() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentName, passport, content, issuerEmail: emailInput,
-          authId: "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7", // [Put real autId]
+          authId: "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7",
           hasFile: !!pdfFile
         })
       });
@@ -287,6 +290,7 @@ export default function App() {
     setSelectedRec(null);
     setStatusMsg('');
     setCanProceed(false);
+    setDemoOtp('');
   };
 
   const IdentityCard = () => {
@@ -396,6 +400,22 @@ export default function App() {
                   Welcome back, <strong style={{ color: '#fff' }}>{identity?.fullName || fullNameInput}</strong>.
                 </p>
                 
+                {/* --- DEMO OTP BOX --- */}
+                {demoOtp && (
+                  <div style={{ 
+                    background: 'rgba(147, 51, 234, 0.1)', 
+                    border: '1px dashed #9333ea', 
+                    padding: '10px', 
+                    borderRadius: '10px', 
+                    marginBottom: '15px',
+                    color: '#9333ea',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}>
+                    ✨ Demo Access Code: {demoOtp}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: 8 }}>
                     <input style={{...inputStyle, marginBottom: 0}} placeholder="Enter OTP Code" value={otpInput} onChange={e => setOtpInput(e.target.value)} />
                     <button 
@@ -558,10 +578,8 @@ export default function App() {
                     Timestamp: {new Date(selectedRec.timestamp).toLocaleString()}
                 </p>
 
-                {/* --- ADDED: View & Download Options (Only if verified) --- */}
                 {selectedRec.status === 'Verified' && (
                     <div style={{ marginTop: 20, borderTop: '1px solid #333', paddingTop: 20 }}>
-                        {/* View Section */}
                         <div style={{ textAlign: 'left', background: '#000', padding: 15, borderRadius: 8, marginBottom: 15 }}>
                             <p style={{ fontSize: 11, color: '#666', margin: '0 0 8px 0', fontWeight: 'bold' }}>RECOMMENDATION TEXT</p>
                             <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.5, margin: 0 }}>"{selectedRec.content}"</p>
@@ -571,7 +589,6 @@ export default function App() {
                             </div>
                         </div>
 
-                        {/* Download Button */}
                         <button 
                             style={{ ...buttonStyle(THEME.accent), marginTop: 0 }}
                             onClick={() => {
@@ -589,14 +606,12 @@ export default function App() {
                         </button>
                     </div>
                 )}
-                {/* ----------------------------------------------------- */}
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* CORRECTED SIGNATURE - WHOLE NAME LINKED */}
       <div style={{ position: 'absolute', bottom: 20, right: 30, zIndex: 30 }}>
         <p style={{ 
             fontSize: '11px', 
