@@ -115,7 +115,7 @@ export default function App() {
   const handleAdminWhitelist = async (action: 'add' | 'delete') => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/admin/whitelist', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/admin/whitelist', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, adminKey, action })
       });
@@ -132,7 +132,7 @@ export default function App() {
     setLoading(true);
     setStatusMsg('Verifying identity — this may take a few seconds...');
     try {
-      const res = await fetch('http://localhost:3001/api/auth/verify-email', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/verify-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, fullName: fullNameInput })
       });
@@ -157,7 +157,7 @@ export default function App() {
   const sendOtp = async () => {
     setLoading(true);
     try {
-      await fetch('http://localhost:3001/api/auth/send-otp', {
+      await fetch('https://trustcycle-drs.onrender.com/api/auth/send-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
@@ -172,7 +172,7 @@ export default function App() {
   const handleVerifyOTP = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/verify-otp', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/verify-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, otp: otpInput })
       });
@@ -192,7 +192,7 @@ export default function App() {
   const handleIssue = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/issue', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/issue', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentName, passport, content, issuerEmail: emailInput,
@@ -219,7 +219,7 @@ export default function App() {
     
     setLoading(true);
     try {
-        const res = await fetch('http://localhost:3001/api/revoke', { 
+        const res = await fetch('https://trustcycle-drs.onrender.com/api/revoke', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recId, email: emailInput })
@@ -241,7 +241,7 @@ export default function App() {
   const handleStudentSearch = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/student/search', {
+      const res = await fetch('https://trustcycle-drs.onrender.com/api/student/search', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ studentName, passport })
       });
@@ -259,7 +259,7 @@ export default function App() {
     if(!id) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/verify/${id}`);
+      const res = await fetch(`https://trustcycle-drs.onrender.com/api/verify/${id}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedRec(data);
