@@ -113,7 +113,7 @@ export default function App() {
 
   const cardStyle: React.CSSProperties = {
     background: THEME.card, 
-    padding: isMobile ? '10px' : '20px', 
+    padding: isMobile ? '20px' : '40px', 
     borderRadius: '24px',
     border: `1px solid ${THEME.accent}44`, 
     width: isMobile ? '95%' : '520px', 
@@ -362,7 +362,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 45 : 80, // Smaller on mobile
+            height: isMobile ? 20 : 80, // Smaller on mobile
             opacity: 0.9 
           }} 
         />
