@@ -10,7 +10,7 @@ const THEME = {
 
 type Panel = 'professor' | 'student' | 'university' | 'provider';
 
-// --- NEW: Custom Hook for Responsive Design ---
+// --- Custom Hook for Responsive Design ---
 function useWindowSize() {
   const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
   useEffect(() => {
@@ -23,7 +23,7 @@ function useWindowSize() {
 
 const BackgroundGlobe = () => {
   const globeEl = useRef<GlobeMethods | undefined>(undefined);
-  // --- NEW: Use hook to adjust globe position on mobile ---
+  // --- Use hook to adjust globe position on mobile ---
   const [width] = useWindowSize();
   const isMobile = width < 768;
 
@@ -48,7 +48,6 @@ const BackgroundGlobe = () => {
     <div style={{
       position: 'fixed',
       top: 0,
-      // --- UPDATED: Center globe on mobile, offset on desktop ---
       left: isMobile ? 0 : '30%',
       width: isMobile ? '100vw' : '100%',
       height: '100%',
@@ -78,7 +77,7 @@ const BackgroundGlobe = () => {
 
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
-  const [demoOtp, setDemoOtp] = useState<string>(''); // Fixed naming to demoOtp
+  const [demoOtp, setDemoOtp] = useState<string>(''); 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [issuedRef, setIssuedRef] = useState<string>('');
@@ -100,33 +99,29 @@ export default function App() {
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
-  // --- NEW: Responsive Logic ---
+  // --- Responsive Logic ---
   const [width] = useWindowSize();
-  const isMobile = width < 768; // Mobile breakpoint
+  const isMobile = width < 768; 
 
   const centeredLayout: React.CSSProperties = {
     minHeight: '100vh', width: '100vw',
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', color: THEME.text, fontFamily: 'system-ui, sans-serif',
     position: 'relative', overflowX: 'hidden', background: THEME.bg,
-    // --- UPDATED: Add padding on mobile so content doesn't touch edges ---
     padding: isMobile ? '10px' : '0'
   };
 
   const cardStyle: React.CSSProperties = {
     background: THEME.card, 
-    // --- UPDATED: Adjust padding for mobile ---
     padding: isMobile ? '20px' : '40px', 
     borderRadius: '24px',
     border: `1px solid ${THEME.accent}44`, 
-    // --- UPDATED: Full width on mobile, fixed on desktop ---
     width: isMobile ? '95%' : '520px', 
     textAlign: 'center',
     boxShadow: `0 0 50px ${THEME.accent}22`, zIndex: 10, backdropFilter: 'blur(12px)',
     position: 'relative', 
-    // --- UPDATED: Center on mobile, offset on desktop ---
     marginRight: isMobile ? '0' : '35%',
-    maxWidth: '100%' // Ensure it doesn't overflow
+    maxWidth: '100%' 
   };
 
   const inputStyle: React.CSSProperties = {
@@ -189,7 +184,7 @@ export default function App() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
-      const data = await res.json(); // Fixed: Defined data here
+      const data = await res.json();
       if (res.ok) {
         if(data.demoOTP || data.demoOtp) setDemoOtp(data.demoOTP || data.demoOtp);
         setStatusMsg('OTP sent! For demo purposes, you can see it below.');
@@ -209,7 +204,7 @@ export default function App() {
         body: JSON.stringify({ email: emailInput, otp: otpInput })
       });
       if (res.ok) {
-        setDemoOtp(''); // Clear demo otp on success
+        setDemoOtp(''); 
         setStep(3);
       } else {
         const e = await res.json();
@@ -356,15 +351,27 @@ export default function App() {
     <div style={centeredLayout}>
       <BackgroundGlobe />
 
-      <div style={{ position: 'absolute', top: 32, left: 32, zIndex: 20 }}>
-        <img src="/masterz_iota.png" alt="masterz iota" style={{ height: 80, opacity: 0.9 }} />
+      {/* --- UPDATED: Responsive styling for the MasterZ logo --- */}
+      <div style={{ 
+        position: 'absolute', 
+        top: isMobile ? 15 : 32,    // Move up on mobile
+        left: isMobile ? 15 : 32,   // Move left on mobile
+        zIndex: 20 
+      }}>
+        <img 
+          src="/masterz_iota.png" 
+          alt="masterz iota" 
+          style={{ 
+            height: isMobile ? 45 : 80, // Smaller on mobile
+            opacity: 0.9 
+          }} 
+        />
       </div>
 
       <div style={{ 
         textAlign: 'center', 
         marginBottom: '20px', 
         zIndex: 10, 
-        // --- UPDATED: Remove margin on mobile for centering ---
         marginRight: isMobile ? '0' : '35%' 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
@@ -384,7 +391,6 @@ export default function App() {
         gap: '10px', 
         marginBottom: '25px', 
         zIndex: 10, 
-        // --- UPDATED: Center buttons on mobile, stack if needed ---
         marginRight: isMobile ? '0' : '35%',
         flexWrap: 'wrap',
         justifyContent: 'center'
