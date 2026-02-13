@@ -351,18 +351,18 @@ export default function App() {
     <div style={centeredLayout}>
       <BackgroundGlobe />
 
-      {/* --- UPDATED: Responsive styling for the MasterZ logo --- */}
+      {/* --- UPDATED: Even smaller MasterZ logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
-        top: isMobile ? 15 : 32,    // Move up on mobile
-        left: isMobile ? 15 : 32,   // Move left on mobile
+        top: isMobile ? 15 : 32,    
+        left: isMobile ? 15 : 32,   
         zIndex: 20 
       }}>
         <img 
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 20 : 80, // Smaller on mobile
+            height: isMobile ? 20 : 80, // <--- FIXED for mobile version
             opacity: 0.9 
           }} 
         />
@@ -382,7 +382,7 @@ export default function App() {
         </div>
         <p style={{ fontSize: '0.95rem', color: '#aaa', marginTop: '4px', fontWeight: 300 }}>
           Decentralized Recommendation System <br />
-          <span style={{ fontSize: '0.75rem', opacity: 0.6, letterSpacing: 1 }}>An Academia Solution Based on IOTA Trust Framework</span>
+          <span style={{ fontSize: '0.75rem', opacity: 0.6, letterSpacing: 1 }}>An Academia Solution Based on IOTA Trust Framework v0.0</span>
         </p>
       </div>
 
@@ -604,9 +604,18 @@ export default function App() {
                     <span style={{ color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444', fontWeight: 'bold', fontSize: 12 }}>{selectedRec.status.toUpperCase()}</span>
                 </div>
                 <p style={{ color: '#eee', fontSize: 14, lineHeight: 1.5 }}>"{selectedRec.content}"</p>
-                <div style={{ marginTop: 12, borderTop: '1px solid #333', paddingTop: 8 }}>
-                    <p style={{fontSize: 11, color: '#666', margin: 0}}>ISSUER</p>
-                    <p style={{fontSize: 12, color: '#aaa', margin: 0}}>{selectedRec.issuerEmail}</p>
+                
+                {/* --- FIXED: Added Reference ID display --- */}
+                <div style={{ marginTop: 12, borderTop: '1px solid #333', paddingTop: 12 }}>
+                    <div style={{ marginBottom: 10 }}>
+                        <p style={{fontSize: 11, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
+                        <code style={{fontSize: 12, color: THEME.accent, wordBreak: 'break-all', display: 'block'}}>{selectedRec.id}</code>
+                    </div>
+
+                    <div>
+                        <p style={{fontSize: 11, color: '#666', margin: 0}}>ISSUER</p>
+                        <p style={{fontSize: 12, color: '#aaa', margin: 0}}>{selectedRec.issuerEmail}</p>
+                    </div>
                 </div>
               </div>
             )}
