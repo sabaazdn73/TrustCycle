@@ -1,0 +1,13 @@
+[package]
+name = "hackathon"
+version = "0.0.1"
+edition = "2024" # Changed from 2024.beta to stable 2024
+
+[dependencies]
+# Using the testnet branch is safer for hackathons to ensure compatibility with the test network nodes.
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "testnet" }
+
+[addresses]
+hackathon = "0x0"
+iota = "0x2"      # Explicitly defining the IOTA framework address is a best practice
+std = "0x1"       # Standard library address
