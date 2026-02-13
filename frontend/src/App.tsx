@@ -10,8 +10,22 @@ const THEME = {
 
 type Panel = 'professor' | 'student' | 'university' | 'provider';
 
+// --- NEW: Custom Hook for Responsive Design ---
+function useWindowSize() {
+  const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
+  useEffect(() => {
+    const handleResize = () => setSize([window.innerWidth, window.innerHeight]);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return size;
+}
+
 const BackgroundGlobe = () => {
   const globeEl = useRef<GlobeMethods | undefined>(undefined);
+  // --- NEW: Use hook to adjust globe position on mobile ---
+  const [width] = useWindowSize();
+  const isMobile = width < 768;
 
   const arcsData = useMemo(() => [...Array(25).keys()].map(() => ({
     startLat: (Math.random() - 0.5) * 180,
@@ -34,8 +48,9 @@ const BackgroundGlobe = () => {
     <div style={{
       position: 'fixed',
       top: 0,
-      left: '30%',
-      width: '100%',
+      // --- UPDATED: Center globe on mobile, offset on desktop ---
+      left: isMobile ? 0 : '30%',
+      width: isMobile ? '100vw' : '100%',
       height: '100%',
       zIndex: 0,
       pointerEvents: 'none'
@@ -85,18 +100,33 @@ export default function App() {
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
+  // --- NEW: Responsive Logic ---
+  const [width] = useWindowSize();
+  const isMobile = width < 768; // Mobile breakpoint
+
   const centeredLayout: React.CSSProperties = {
     minHeight: '100vh', width: '100vw',
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', color: THEME.text, fontFamily: 'system-ui, sans-serif',
-    position: 'relative', overflow: 'hidden', background: THEME.bg
+    position: 'relative', overflowX: 'hidden', background: THEME.bg,
+    // --- UPDATED: Add padding on mobile so content doesn't touch edges ---
+    padding: isMobile ? '10px' : '0'
   };
 
   const cardStyle: React.CSSProperties = {
-    background: THEME.card, padding: '40px', borderRadius: '24px',
-    border: `1px solid ${THEME.accent}44`, width: '520px', textAlign: 'center',
+    background: THEME.card, 
+    // --- UPDATED: Adjust padding for mobile ---
+    padding: isMobile ? '20px' : '40px', 
+    borderRadius: '24px',
+    border: `1px solid ${THEME.accent}44`, 
+    // --- UPDATED: Full width on mobile, fixed on desktop ---
+    width: isMobile ? '95%' : '520px', 
+    textAlign: 'center',
     boxShadow: `0 0 50px ${THEME.accent}22`, zIndex: 10, backdropFilter: 'blur(12px)',
-    position: 'relative', marginRight: '35%'
+    position: 'relative', 
+    // --- UPDATED: Center on mobile, offset on desktop ---
+    marginRight: isMobile ? '0' : '35%',
+    maxWidth: '100%' // Ensure it doesn't overflow
   };
 
   const inputStyle: React.CSSProperties = {
@@ -330,7 +360,13 @@ export default function App() {
         <img src="/masterz_iota.png" alt="masterz iota" style={{ height: 80, opacity: 0.9 }} />
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '20px', zIndex: 10, marginRight: '35%' }}>
+      <div style={{ 
+        textAlign: 'center', 
+        marginBottom: '20px', 
+        zIndex: 10, 
+        // --- UPDATED: Remove margin on mobile for centering ---
+        marginRight: isMobile ? '0' : '35%' 
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
           <img src="/logo-galaxy.png" alt="logo" style={{ width: 50, height: 50 }} />
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-1.5px' }}>
@@ -343,7 +379,16 @@ export default function App() {
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', zIndex: 10, marginRight: '35%' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '10px', 
+        marginBottom: '25px', 
+        zIndex: 10, 
+        // --- UPDATED: Center buttons on mobile, stack if needed ---
+        marginRight: isMobile ? '0' : '35%',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }}>
         {(['professor', 'student', 'university', 'provider'] as Panel[]).map(p => (
           <button 
             key={p} 
