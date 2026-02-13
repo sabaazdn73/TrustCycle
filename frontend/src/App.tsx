@@ -113,7 +113,7 @@ export default function App() {
 
   const cardStyle: React.CSSProperties = {
     background: THEME.card, 
-    padding: isMobile ? '20px' : '40px', 
+    padding: isMobile ? '10px' : '20px', 
     borderRadius: '24px',
     border: `1px solid ${THEME.accent}44`, 
     width: isMobile ? '95%' : '520px', 
