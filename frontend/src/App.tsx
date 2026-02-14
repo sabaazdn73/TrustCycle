@@ -703,7 +703,7 @@ export default function App() {
           >
             Crafted
           </a>
-          {''}by{' '}
+          {' '}by{' '}
           <a
             href="https://www.linkedin.com/in/saba-azadegan-2974b622a/"
             target="_blank" 
