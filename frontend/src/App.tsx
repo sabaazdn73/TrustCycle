@@ -326,8 +326,8 @@ export default function App() {
           src={(identity.photo || '/logo-galaxy.png')} 
           alt="photo" 
           style={{ 
-            width: 50, 
-            height: 50, 
+            width: 70, 
+            height: 70, 
             borderRadius: '50%', 
             objectFit: 'cover', 
             border: `2px solid ${canProceed ? '#4ade80' : '#666'}` 
