@@ -379,7 +379,7 @@ export default function App() {
           alt="logo" 
           style={{ 
             width: isMobile ? 40 : 80,  //logo size conditional
-            height: isMobile ? 70 : 100 
+            height: isMobile ? 70 : 110 
             }}/>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-1.5px' }}>
             Trust<span style={{ color: THEME.accent }}>Cycle</span>
