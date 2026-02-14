@@ -362,7 +362,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 20 : 80, // <--- FIXED for mobile version
+            height: isMobile ? 30 : 100, // left-up logo conditional
             opacity: 0.9 
           }} 
         />
@@ -375,7 +375,12 @@ export default function App() {
         marginRight: isMobile ? '0' : '35%' 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <img src="/logo-galaxy.png" alt="logo" style={{ width: 60, height: 60 }} />
+          <img src="/logo-galaxy.png" 
+          alt="logo" 
+          style={{ 
+            width: isMobile ? 40 : 80,  //logo size conditional
+            height: isMobile ? 70 : 100 
+            }}/>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-1.5px' }}>
             Trust<span style={{ color: THEME.accent }}>Cycle</span>
           </h1>
