@@ -326,8 +326,8 @@ export default function App() {
           src={(identity.photo || '/logo-galaxy.png')} 
           alt="photo" 
           style={{ 
-            width: 70, 
-            height: 70, 
+            width: 50, 
+            height: 50, 
             borderRadius: '50%', 
             objectFit: 'cover', 
             border: `2px solid ${canProceed ? '#4ade80' : '#666'}` 
@@ -375,7 +375,7 @@ export default function App() {
         marginRight: isMobile ? '0' : '35%' 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <img src="/logo-galaxy.png" alt="logo" style={{ width: 50, height: 50 }} />
+          <img src="/logo-galaxy.png" alt="logo" style={{ width: 60, height: 60 }} />
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-1.5px' }}>
             Trust<span style={{ color: THEME.accent }}>Cycle</span>
           </h1>
