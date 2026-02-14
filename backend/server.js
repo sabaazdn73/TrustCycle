@@ -149,6 +149,14 @@ app.post('/api/admin/whitelist', (req, res) => {
 app.post('/api/auth/verify-email', async (req, res) => {
   const { email, fullName } = req.body;
 
+  // If full name and email are missing, reject
+  if (!email || !fullName || email.trim() === '' || fullName.trim() ==='') {
+    return res.status(400).json({
+        success: false,
+        error: 'Please enter both Full Name and Academic Email.'
+    })
+  }
+
   // 1. Check Whitelist
   const isWhitelisted = whitelist.includes(email);
   
