@@ -686,7 +686,24 @@ export default function App() {
             letterSpacing: '0.5px',
             cursor: 'default',
         }}>
-          Crafted by{' '}
+          <a
+            href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing/"
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              fontWeight: 'bold',
+              color: '#8c8a8ac7',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'color 0.2s ease',
+              borderBottom: '1px dotted #7e7d7d'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+          >
+            Crafted
+          </a>
+          {''}by{' '}
           <a
             href="https://www.linkedin.com/in/saba-azadegan-2974b622a/"
             target="_blank" 
