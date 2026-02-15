@@ -677,7 +677,13 @@ export default function App() {
         )}
       </div>
 
-      <div style={{ position: 'absolute', bottom: 20, right: 30, zIndex: 30, textAlign: 'right' }}>
+      <div style={{ 
+          position: 'absolute', 
+          bottom: 20, 
+          right: 30, 
+          zIndex: 30, 
+          textAlign: 'left'
+      }}>
         <p style={{ 
             fontSize: '11px', 
             color: '#817d7de9', 
