@@ -677,7 +677,7 @@ export default function App() {
         )}
       </div>
 
-      <div style={{ position: 'absolute', bottom: 20, right: 30, zIndex: 30 }}>
+      <div style={{ position: 'absolute', bottom: 20, right: 30, zIndex: 30, textAlign: 'right' }}>
         <p style={{ 
             fontSize: '11px', 
             color: '#817d7de9', 
@@ -686,24 +686,7 @@ export default function App() {
             letterSpacing: '0.5px',
             cursor: 'default',
         }}>
-          <a
-            href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing/"
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              fontWeight: 'bold',
-              color: '#8c8a8ac7',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              borderBottom: '1px dotted #7e7d7d'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
-          >
-            Crafted
-          </a>
-          {' '}by{' '}
+          Crafted by{' '}
           <a
             href="https://www.linkedin.com/in/saba-azadegan-2974b622a/"
             target="_blank" 
@@ -739,7 +722,50 @@ export default function App() {
           >
             MasterZ*IOTA Hackathon
           </a>
-          {' '}
+        </p>
+
+        <p style={{ 
+            fontSize: '11px', 
+            color: '#817d7de9', 
+            margin: '6px 0 0 0', 
+            fontFamily: 'monospace',
+            letterSpacing: '0.5px',
+        }}>
+          <a
+            href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing"
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              fontWeight: 'bold',
+              color: '#8c8a8ac7',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'color 0.2s ease',
+              borderBottom: '1px dotted #7e7d7d'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+          >
+            How it Works
+          </a>
+          {' . '}
+          <a
+            href="https://github.com/sabaazdn73/TrustCycle-DRS"
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              fontWeight: 'bold',
+              color: '#8c8a8ac7',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'color 0.2s ease',
+              borderBottom: '1px dotted #7e7d7d'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+          >
+            GitHub
+          </a>
         </p>
       </div>
     </div>
