@@ -566,7 +566,7 @@ export default function App() {
             {step === 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button style={buttonStyle()} onClick={() => setStep(2)}>🔍 Find My Records</button>
-                <button style={buttonStyle('#222')} onClick={() => setStep(4)}>🎫 Validate a Code</button>
+                <button style={buttonStyle('#222')} onClick={() => setStep(4)}>🔗 Verify Reference Code</button>
               </div>
             )}
             {step === 2 && (
@@ -678,9 +678,12 @@ export default function App() {
       </div>
 
       <div style={{ 
-          position: 'absolute', 
-          bottom: 20, 
-          right: 30, 
+          position: isMobile ? 'relative' : 'absolute',
+          bottom: isMobile ? 'auto' : 20,
+          right: isMobile ? 'auto' : 30,
+          marginTop: isMobile ? '40px' : 0,
+          paddingBottom: isMobile ? '20px' : 0,
+          width: isMobile ? '100%' : 'auto',
           zIndex: 30, 
           textAlign: 'center'
       }}>
