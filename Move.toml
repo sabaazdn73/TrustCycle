@@ -4,7 +4,7 @@ version = "0.0.1"
 edition = "2024" 
 
 [dependencies]
-# Using the testnet branch is safer for hackathons to ensure compatibility with the test network nodes.
+# Using the testnet
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "testnet" }
 
 [addresses]
