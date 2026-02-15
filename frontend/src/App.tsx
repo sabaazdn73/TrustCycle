@@ -682,7 +682,7 @@ export default function App() {
           bottom: 20, 
           right: 30, 
           zIndex: 30, 
-          textAlign: 'left'
+          textAlign: 'center'
       }}>
         <p style={{ 
             fontSize: '11px', 
