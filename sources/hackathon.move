@@ -2,10 +2,7 @@ module hackathon::recommendation {
     use iota::clock::{Self, Clock};
     use iota::event;
     
-    // In the new IOTA Move 2024 edition, standard modules like object, transfer, 
-    // and tx_context are often implicitly available or aliased by default.
-    // We only import what strictly necessary to avoid "Unnecessary alias" warnings.
-    
+
     // ================= Errors =================
     const E_NOT_AUTHORIZED: u64 = 1;
     const E_ALREADY_REVOKED: u64 = 2;

@@ -351,7 +351,7 @@ export default function App() {
     <div style={centeredLayout}>
       <BackgroundGlobe />
 
-      {/* --- UPDATED: Even smaller MasterZ logo on mobile --- */}
+      {/* ---  MasterZ logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
         top: isMobile ? 15 : 32,    
