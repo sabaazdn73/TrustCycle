@@ -445,7 +445,7 @@ export default function App() {
                 <input style={inputStyle} placeholder="Full Name" value={fullNameInput} onChange={e => setFullNameInput(e.target.value)} />
                 <input style={inputStyle} placeholder="Institutional Email" value={emailInput} onChange={e => setEmailInput(e.target.value)} />
                 <button disabled={loading} style={buttonStyle()} onClick={handleProfessorAuth}>{loading ? "Checking..." : "Verify Identity"}</button>
-                <p style={{ color: '#555', marginTop: 12, fontSize: 11 }}>We verify public web presence via Google Knowledge Graph.</p>
+                <p style={{ color: '#555', marginTop: 12, fontSize: 11 }}>Academic identity is verified via Google Knowledge Graph & institutional records.</p>
               </>
             )}
 
