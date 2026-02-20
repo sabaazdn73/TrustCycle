@@ -361,6 +361,64 @@ app.get('/api/verify/:id', async (req, res) => {
 });
 
 /* ======================================================
+   8.5 W3C VERIFIABLE CREDENTIAL API (Standard Export)
+====================================================== */
+app.get('/api/vc/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 1. Finding Recommendation from IOTA (DB)
+    const record = await Recommendation.findOne({ id });
+    
+    if (!record) {
+        return res.status(404).json({ error: 'Credential not found' });
+    }
+
+    if (record.status === 'Revoked') {
+        return res.status(400).json({ error: 'This credential has been revoked by the issuer.' });
+    }
+
+    
+    
+    // 2. Standard VC Format (W3C + Custom Fields for IOTA)
+    const vcDocument = {
+        "@context": [
+            "https://www.w3.org/2018/credentials/v1",
+            "https://trustcycle.io/credentials/v1"
+        ],
+        "type": ["VerifiableCredential", "AcademicRecommendation"],
+        "id": `urn:uuid:${record.id}`,
+        "issuer": {
+            "id": `did:iota:${adminAddress}`,
+            "name": record.issuerEmail,
+            "verificationMethod": "Google Knowledge Graph via TrustCycle"
+        },
+        "issuanceDate": new Date(record.timestamp).toISOString(),
+        "credentialSubject": {
+            "id": `did:student:${record.passportHash}`,
+            "studentName": record.studentName,
+            "contentHash": record.contentHash 
+        },
+        "proof": {
+            "type": "IotaMoveAnchoredSignature2026",
+            "created": new Date(record.timestamp).toISOString(),
+            "proofPurpose": "assertionMethod",
+            "verificationMethod": `https://explorer.iota.org/txblock/${record.txDigest}?network=testnet`,
+            "transactionDigest": record.txDigest
+        }
+    };
+
+    // 3. Standrd JSON-LD Response
+    res.setHeader('Content-Type', 'application/ld+json');
+    res.json(vcDocument);
+
+  } catch (e) {
+      console.error("VC Generation Error:", e);
+      res.status(500).json({ error: "Failed to generate Verifiable Credential" });
+  }
+});
+
+/* ======================================================
    9. SERVER START
 ====================================================== */
 const PORT = process.env.PORT || 3001;
