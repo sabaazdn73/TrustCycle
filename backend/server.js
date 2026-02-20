@@ -204,13 +204,13 @@ app.post('/api/auth/verify-otp', (req, res) => {
 ====================================================== */
 app.post('/api/issue', async (req, res) => {
   try {
-    const { authId, studentName, passport, content, issuerEmail } = req.body;
+    const { authId, 'note=Demo version for MasterZ*IOTA Europe Hackaton 2026 ': studentName, passport, content, issuerEmail } = req.body;
     if (!authId || !studentName || !passport || !content) return res.status(400).json({ error: "Missing required fields" });
 
     // Formatting the final immutable content
     // NOTE: Keeping 'passport' out of this formatted text to ensure DB privacy
     const dateIssued = new Date().toUTCString();
-    const formattedContent = `Demo version for MasterZ*IOTA Europe Hackathon 2026\n${content}`;
+    const formattedContent = `\n${content}`;
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
