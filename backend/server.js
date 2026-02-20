@@ -210,7 +210,7 @@ app.post('/api/issue', async (req, res) => {
     // Formatting the final immutable content
     // NOTE: Keeping 'passport' out of this formatted text to ensure DB privacy
     const dateIssued = new Date().toUTCString();
-    const formattedContent = `Recommendation:\n${content}`;
+    const formattedContent = `Demo version for MasterZ*IOTA Europe Hackathon 2026\n${content}`;
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
