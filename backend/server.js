@@ -210,7 +210,7 @@ app.post('/api/issue', async (req, res) => {
     // Formatting the final immutable content
     // NOTE: Keeping 'passport' out of this formatted text to ensure DB privacy
     const dateIssued = new Date().toUTCString();
-    const formattedContent = `*** TRUSTCYCLE VERIFIED ***\nThis is a demo version for MasterZ*IOTA first Europe Hackathon 2026.\n\nDate: ${dateIssued}\nIssuer Email: ${issuerEmail}\nStudent Name: ${studentName}\n\nRecommendation:\n${content}`;
+    const formattedContent = `Demo version, built for the MasterZ*IOTA First Web3 Europe Hackathon 2026.\n\nRecommendation:\n${content}`;
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
