@@ -99,7 +99,6 @@ export default function App() {
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
   
-  // ✅ اصلاح ۱: استفاده از State برای اینپوت‌ها به جای getElementById
   const [studentRefInput, setStudentRefInput] = useState('');
   const [uniRefInput, setUniRefInput] = useState('');
 
@@ -228,6 +227,7 @@ export default function App() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentName, passport, content, issuerEmail: emailInput,
+          issuerName: identity?.fullName || fullNameInput,
           authId: "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7",
           hasFile: !!pdfFile
         })
@@ -345,7 +345,6 @@ export default function App() {
     setStatusMsg('');
     setCanProceed(false);
     setDemoOtp('');
-    // پاک کردن اینپوت‌های سرچ هنگام تغییر پنل
     setStudentRefInput('');
     setUniRefInput('');
   };
@@ -646,7 +645,6 @@ export default function App() {
               <>
                 <button onClick={() => setStep(1)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', float: 'left' }}>← Back</button>
                 <div style={{clear: 'both'}}></div>
-                {/* ✅ اصلاح ۲: استفاده از State به جای ID */}
                 <input 
                   style={inputStyle} 
                   placeholder="Paste Reference Code Here" 
@@ -680,7 +678,6 @@ export default function App() {
                         <p style={{fontSize: 11, color: '#666', margin: 0}}>ISSUER</p>
                         <p style={{fontSize: 12, color: '#aaa', margin: 0}}>{selectedRec.issuerEmail}</p>
                     </div>
-                    {/* اضافه شدن دکمه دانلود در ویوی جزئیات (برای اطمینان) */}
                     <button 
                         style={{ ...buttonStyle(), marginTop: 12 }} 
                         onClick={() => handleDownloadJSON(selectedRec.id)}
@@ -697,7 +694,6 @@ export default function App() {
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
             <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>Verify the authenticity of an applicant's recommendation.</p>
-            {/* ✅ اصلاح ۳: استفاده از State به جای ID */}
             <input 
               style={inputStyle} 
               placeholder="Enter Recommendation Reference Hash" 
@@ -745,7 +741,15 @@ export default function App() {
                             <button 
                                 style={{ ...buttonStyle('#222'), marginTop: 0 }}
                                 onClick={() => {
-                                    const txt = `TRUSTCYCLE VERIFIED - Demo version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).\n\nStudent: ${selectedRec.studentName}\nPassport: ${selectedRec.passport}\nDate: ${new Date(selectedRec.timestamp).toLocaleString()}\n\nRecommendation:\n"${selectedRec.content}"\n\nIssuer: ${selectedRec.issuerEmail}\nSignature: ${selectedRec.id}`;
+                                    const txt = `TRUSTCYCLE VERIFIED - Demo version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).
+                                    Student: ${selectedRec.studentName}
+                                    Passport: ${selectedRec.passport}
+                                    Date: ${new Date(selectedRec.timestamp).toLocaleString()}
+                                    Recommendation:
+                                    "${selectedRec.content}"
+                                    Professor Name: ${selectedRec.issuerName || 'Verified Academic'}
+                                    Issuer Email: ${selectedRec.issuerEmail}
+                                    Signature: ${selectedRec.id}`;
                                     const blob = new Blob([txt], { type: 'text/plain' });
                                     const url = URL.createObjectURL(blob);
                                     const a = document.createElement('a');

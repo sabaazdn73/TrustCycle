@@ -53,6 +53,7 @@ mongoose.connect(process.env.MONGO_URI)
 const RecSchema = new mongoose.Schema({
     id: String,           
     issuerEmail: String,
+    issuerName: String,
     studentName: String,
     encryptedPassport: String, 
     passportHash: String,      
@@ -204,7 +205,7 @@ app.post('/api/auth/verify-otp', (req, res) => {
 ===================================================== */
 app.post('/api/issue', async (req, res) => {
   try {
-    const { authId, studentName, passport, content, issuerEmail } = req.body;
+    const { authId, studentName, passport, content, issuerEmail, issuerName } = req.body;
     if (!authId || !studentName || !passport || !content) return res.status(400).json({ error: "Missing required fields" });
 
     const hackathonNote = "Demo version for MasterZ*IOTA Europe Hackathon 2026.";
@@ -274,6 +275,7 @@ app.post('/api/issue', async (req, res) => {
     const newRecord = new Recommendation({
       id: recId,
       issuerEmail,
+      issuerName,
       studentName,
       encryptedPassport, 
       passportHash, 
