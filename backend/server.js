@@ -209,7 +209,7 @@ app.post('/api/issue', async (req, res) => {
 
     const hackathonNote = "Demo version for MasterZ*IOTA Europe Hackathon 2026.";
     const dateIssued = new Date().toUTCString();
-    const formattedContent = `*** TRUSTCYCLE VERIFIED (${hackathonNote}) ***\n\nDate: ${dateIssued}\nIssuer: ${issuerEmail}\nStudent: ${studentName}\n\nRecommendation:\n${content}`;
+    const formattedContent = `\n${content}`;
 
     /* ======================================================
        VC GENERATION + NATIVE Ed25519 SIGNING (Move-Compatible)
