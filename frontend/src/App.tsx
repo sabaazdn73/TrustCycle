@@ -741,7 +741,7 @@ export default function App() {
                             <button 
                                 style={{ ...buttonStyle('#222'), marginTop: 0 }}
                                 onClick={() => {
-                                    const txt = `TRUSTCYCLE VERIFIED - Demo version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).
+                                    const txt = `TRUSTCYCLE VERIFIED - Demo Version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).
                                     Student: ${selectedRec.studentName}
                                     Passport: ${selectedRec.passport}
                                     Date: ${new Date(selectedRec.timestamp).toLocaleString()}
