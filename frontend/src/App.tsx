@@ -301,6 +301,31 @@ export default function App() {
     }
   };
 
+  // ---  Download VC JSON ---
+  const handleDownloadJSON = async (recId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`https://trustcycle-drs.onrender.com/api/vc/${recId}`);
+      if (!response.ok) throw new Error("Verifiable Credential not found");
+      const vcData = await response.json();
+
+      const fileName = `TrustCycle-Credential-${recId.substring(0, 8)}.json`;
+      const blob = new Blob([JSON.stringify(vcData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      alert("Error downloading JSON: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetFlow = (nextPanel: Panel) => {
     setPanel(nextPanel);
     setStep(1);
@@ -589,7 +614,23 @@ export default function App() {
                         <span style={{fontSize: 12}}>{r.status === 'Verified' ? '✅' : '❌'}</span>
                     </div>
                     <div style={{marginTop: 8, fontSize: 14}}>{r.content}</div>
-                    <button style={{ background: 'none', border: 'none', color: THEME.accent, marginTop: 8, fontSize: 12, padding: 0, cursor: 'pointer' }} onClick={() => handleVerifyId(r.id)}>View Full Details</button>
+                    
+                    {/* ---  tabs --- */}
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                      <button 
+                        style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, padding: 0, cursor: 'pointer', fontWeight: 'bold' }} 
+                        onClick={() => handleVerifyId(r.id)}
+                      >
+                        View Details
+                      </button>
+
+                      <button 
+                        style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, padding: 0, cursor: 'pointer', fontWeight: 'bold' }} 
+                        onClick={() => handleDownloadJSON(r.id)}
+                      >
+                        ⬇️ Download VC (JSON)
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -654,21 +695,33 @@ export default function App() {
                             </div>
                         </div>
 
-                        <button 
-                            style={{ ...buttonStyle(THEME.accent), marginTop: 0 }}
-                            onClick={() => {
-                                const txt = `TRUSTCYCLE VERIFIED - Demo version, Built For the First European Web3 Hackathon by MasterZ*IOTA (2026).\n\nStudent: ${selectedRec.studentName}\nPassport: ${selectedRec.passport}\nDate: ${new Date(selectedRec.timestamp).toLocaleString()}\n\nRecommendation:\n"${selectedRec.content}"\n\nIssuer: ${selectedRec.issuerEmail}\nSignature: ${selectedRec.id}`;
-                                const blob = new Blob([txt], { type: 'text/plain' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `Rec_${selectedRec.studentName}.txt`;
-                                a.click();
-                                URL.revokeObjectURL(url);
-                            }}
-                        >
-                            ⬇️ Download / Save Record
-                        </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {/* Europe standard*/}
+                            <button 
+                                disabled={loading}
+                                style={buttonStyle(THEME.accent)}
+                                onClick={() => handleDownloadJSON(selectedRec.id)}
+                            >
+                                {loading ? "Fetching VC..." : "⬇️ Download Official VC (JSON)"}
+                            </button>
+
+                           
+                            <button 
+                                style={{ ...buttonStyle('#222'), marginTop: 0 }}
+                                onClick={() => {
+                                    const txt = `TRUSTCYCLE VERIFIED - Demo version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).\n\nStudent: ${selectedRec.studentName}\nPassport: ${selectedRec.passport}\nDate: ${new Date(selectedRec.timestamp).toLocaleString()}\n\nRecommendation:\n"${selectedRec.content}"\n\nIssuer: ${selectedRec.issuerEmail}\nSignature: ${selectedRec.id}`;
+                                    const blob = new Blob([txt], { type: 'text/plain' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `Rec_${selectedRec.studentName}.txt`;
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                }}
+                            >
+                                📄 Save as Plain Text
+                            </button>
+                        </div>
                     </div>
                 )}
               </div>
