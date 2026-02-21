@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@iota/identity-wasm": "^1.9.0-beta.1",
     "@iota/iota-sdk": "^1.10.1",
     "axios": "^1.13.4",
     "cors": "^2.8.6",

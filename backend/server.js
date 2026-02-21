@@ -413,8 +413,26 @@ app.get('/api/verify/:id', async (req, res) => {
   }
 });
 
-res.setHeader('Content-Type', 'application/ld+json');
-res.json(record.vc);
+/* ======================================================
+   8.5 PUBLIC VC EXPORT API (W3C Standard)
+====================================================== */
+app.get('/api/vc/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const record = await Recommendation.findOne({ id });
+    
+    if (!record || !record.vc) return res.status(404).json({ error: 'Verifiable Credential not found' });
+    if (record.status === 'Revoked') return res.status(400).json({ error: 'This credential has been revoked.' });
+
+    // Return the signed VC in W3C format
+    res.setHeader('Content-Type', 'application/ld+json');
+    res.json(record.vc);
+
+  } catch (e) {
+      console.error("VC Fetch Error:", e);
+      res.status(500).json({ error: "Failed to fetch Verifiable Credential" });
+  }
+});
 
 /* ======================================================
    9. SERVER START
