@@ -98,6 +98,10 @@ export default function App() {
   const [otpInput, setOtpInput] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
+  
+  // ✅ اصلاح ۱: استفاده از State برای اینپوت‌ها به جای getElementById
+  const [studentRefInput, setStudentRefInput] = useState('');
+  const [uniRefInput, setUniRefInput] = useState('');
 
   // --- Responsive Logic ---
   const [width] = useWindowSize();
@@ -341,6 +345,9 @@ export default function App() {
     setStatusMsg('');
     setCanProceed(false);
     setDemoOtp('');
+    // پاک کردن اینپوت‌های سرچ هنگام تغییر پنل
+    setStudentRefInput('');
+    setUniRefInput('');
   };
 
   const IdentityCard = () => {
@@ -639,8 +646,19 @@ export default function App() {
               <>
                 <button onClick={() => setStep(1)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', float: 'left' }}>← Back</button>
                 <div style={{clear: 'both'}}></div>
-                <input style={inputStyle} placeholder="Paste Reference Code Here" id="refInput" />
-                <button style={buttonStyle()} onClick={() => handleVerifyId((document.getElementById('refInput') as any).value)}>Fetch Data</button>
+                {/* ✅ اصلاح ۲: استفاده از State به جای ID */}
+                <input 
+                  style={inputStyle} 
+                  placeholder="Paste Reference Code Here" 
+                  value={studentRefInput}
+                  onChange={(e) => setStudentRefInput(e.target.value)}
+                />
+                <button 
+                  style={buttonStyle()} 
+                  onClick={() => handleVerifyId(studentRefInput)}
+                >
+                  Fetch Data
+                </button>
               </>
             )}
             {selectedRec && (
@@ -662,6 +680,13 @@ export default function App() {
                         <p style={{fontSize: 11, color: '#666', margin: 0}}>ISSUER</p>
                         <p style={{fontSize: 12, color: '#aaa', margin: 0}}>{selectedRec.issuerEmail}</p>
                     </div>
+                    {/* اضافه شدن دکمه دانلود در ویوی جزئیات (برای اطمینان) */}
+                    <button 
+                        style={{ ...buttonStyle(), marginTop: 12 }} 
+                        onClick={() => handleDownloadJSON(selectedRec.id)}
+                    >
+                        ⬇️ Download Official VC (JSON)
+                    </button>
                 </div>
               </div>
             )}
@@ -672,8 +697,20 @@ export default function App() {
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
             <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>Verify the authenticity of an applicant's recommendation.</p>
-            <input style={inputStyle} placeholder="Enter Recommendation Reference Hash" id="uniRef" />
-            <button disabled={loading} style={buttonStyle()} onClick={() => handleVerifyId((document.getElementById('uniRef') as any).value)}>Verify Authenticity</button>
+            {/* ✅ اصلاح ۳: استفاده از State به جای ID */}
+            <input 
+              style={inputStyle} 
+              placeholder="Enter Recommendation Reference Hash" 
+              value={uniRefInput}
+              onChange={(e) => setUniRefInput(e.target.value)}
+            />
+            <button 
+              disabled={loading} 
+              style={buttonStyle()} 
+              onClick={() => handleVerifyId(uniRefInput)}
+            >
+              Verify Authenticity
+            </button>
             {selectedRec && (
               <div style={{ marginTop: 24, padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
                 <div style={{fontSize: 40, marginBottom: 10}}>{selectedRec.status === 'Verified' ? '🛡️' : '⚠️'}</div>
@@ -696,7 +733,6 @@ export default function App() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {/* Europe standard*/}
                             <button 
                                 disabled={loading}
                                 style={buttonStyle(THEME.accent)}
@@ -761,8 +797,6 @@ export default function App() {
               transition: 'color 0.2s ease',
               borderBottom: '1px dotted #7e7d7d'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
           >
             Saba Azadegan
           </a>
@@ -779,8 +813,6 @@ export default function App() {
               transition: 'color 0.2s ease',
               borderBottom: '1px dotted #7e7d7d'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
           >
             MasterZ*IOTA Hackathon
           </a>
@@ -796,17 +828,7 @@ export default function App() {
           <a
             href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing"
             target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              fontWeight: 'bold',
-              color: '#8c8a8ac7',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              borderBottom: '1px dotted #7e7d7d'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+            style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}
           >
             How it Works
           </a>
@@ -814,17 +836,7 @@ export default function App() {
           <a
             href="https://github.com/sabaazdn73/TrustCycle-DRS"
             target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              fontWeight: 'bold',
-              color: '#8c8a8ac7',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              borderBottom: '1px dotted #7e7d7d'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = THEME.accent}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+            style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}
           >
             GitHub
           </a>
