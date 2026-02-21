@@ -59,6 +59,7 @@ const RecSchema = new mongoose.Schema({
     passportHash: String,      // SECURE: Hash for searching
     content: String,      
     contentHash: String,
+    vc: Object, // SECURE: Verifiable Credential (W3C Standard)
     status: { type: String, default: 'Verified' },
     txDigest: String,
     timestamp: { type: Date, default: Date.now }
@@ -87,6 +88,31 @@ const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ISSUER_MNEMONIC);
 const adminAddress = adminKeypair.toIotaAddress();
 console.log(`🤖 Admin Address loaded: ${adminAddress}`);
 
+/* ======================================================
+   1.1 DID INITIALIZATION (Walletless Issuer Identity)
+====================================================== */
+
+const { IotaIdentityClient } = require('@iota/identity-wasm/node');
+
+let issuerDidDocument = null;
+let issuerDidFragment = null;
+
+async function initDID() {
+    try {
+        const identityClient = new IotaIdentityClient(process.env.IOTA_NODE_URL);
+
+        // Create DID for demo issuer (walletless)
+        const result = await identityClient.createDid(adminKeypair);
+        issuerDidDocument = result.document;
+        issuerDidFragment = result.fragment;
+
+        await identityClient.publishDid(issuerDidDocument);
+
+        console.log("✅ Issuer DID Published:", issuerDidDocument.id().toString());
+    } catch (err) {
+        console.error("DID Initialization Error:", err);
+    }
+}
 /* ======================================================
    2. IN-MEMORY STATE
 ====================================================== */
@@ -212,11 +238,37 @@ app.post('/api/issue', async (req, res) => {
     const dateIssued = new Date().toUTCString();
     const formattedContent = `\n${content}`;
 
+    /* ======================================================
+   VC GENERATION + SIGNING (Walletless DID)
+   ====================================================== */
+   const vcPayload = {
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1"
+    ],
+    "type": ["VerifiableCredential", "AcademicRecommendation"],
+    "issuer": issuerDidDocument.id().toString(),
+    "issuanceDate": new Date().toISOString(),
+    "credentialSubject": {
+        "studentName": studentName,
+        "passportHash": sha256(passport),
+        "recommendationText": formattedContent
+    }
+};
+
+// Sign VC using DID
+const signedVc = await issuerDidDocument.signCredential(vcPayload, {
+    method: issuerDidFragment,
+    proofPurpose: "assertionMethod"
+});
+
+// Hash entire signed VC
+const vcString = JSON.stringify(signedVc);
+const contentHash = sha256(vcString);
+
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
 
     const passportHash = sha256(passport); 
-    const contentHash = sha256(formattedContent);
     const encryptedPassport = encrypt(passport); // AES Encryption
 
     tx.moveCall({
@@ -250,6 +302,7 @@ app.post('/api/issue', async (req, res) => {
       passportHash, 
       content: formattedContent,  
       contentHash,
+      vc: signedVc,
       status: 'Verified',
       txDigest: result.digest,
     });
@@ -360,68 +413,14 @@ app.get('/api/verify/:id', async (req, res) => {
   }
 });
 
-/* ======================================================
-   8.5 W3C VERIFIABLE CREDENTIAL API (Standard Export)
-====================================================== */
-app.get('/api/vc/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // 1. Finding Recommendation from IOTA (DB)
-    const record = await Recommendation.findOne({ id });
-    
-    if (!record) {
-        return res.status(404).json({ error: 'Credential not found' });
-    }
-
-    if (record.status === 'Revoked') {
-        return res.status(400).json({ error: 'This credential has been revoked by the issuer.' });
-    }
-
-    
-    
-    // 2. Standard VC Format (W3C + Custom Fields for IOTA)
-    const vcDocument = {
-        "@context": [
-            "https://www.w3.org/2018/credentials/v1",
-            "https://trustcycle.io/credentials/v1"
-        ],
-        "type": ["VerifiableCredential", "AcademicRecommendation"],
-        "id": `urn:uuid:${record.id}`,
-        "issuer": {
-            "id": `did:iota:${adminAddress}`,
-            "name": record.issuerEmail,
-            "verificationMethod": "Google Knowledge Graph via TrustCycle"
-        },
-        "issuanceDate": new Date(record.timestamp).toISOString(),
-        "credentialSubject": {
-            "id": `did:student:${record.passportHash}`,
-            "studentName": record.studentName,
-            "contentHash": record.contentHash 
-        },
-        "proof": {
-            "type": "IotaMoveAnchoredSignature2026",
-            "created": new Date(record.timestamp).toISOString(),
-            "proofPurpose": "assertionMethod",
-            "verificationMethod": `https://explorer.iota.org/txblock/${record.txDigest}?network=testnet`,
-            "transactionDigest": record.txDigest
-        }
-    };
-
-    // 3. Standrd JSON-LD Response
-    res.setHeader('Content-Type', 'application/ld+json');
-    res.json(vcDocument);
-
-  } catch (e) {
-      console.error("VC Generation Error:", e);
-      res.status(500).json({ error: "Failed to generate Verifiable Credential" });
-  }
-});
+res.setHeader('Content-Type', 'application/ld+json');
+res.json(record.vc);
 
 /* ======================================================
    9. SERVER START
 ====================================================== */
 const PORT = process.env.PORT || 3001;
+initDID();
 app.listen(PORT, '0.0.0.0' , () => {
   console.log(`🚀 TrustCycle Backend is live on port ${PORT}`);
   console.log(`🔗 Connected to IOTA Node`);
