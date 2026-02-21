@@ -657,7 +657,7 @@ export default function App() {
                         <button 
                             style={{ ...buttonStyle(THEME.accent), marginTop: 0 }}
                             onClick={() => {
-                                const txt = `TRUSTCYCLE VERIFIED - Demo version, built for te MasterZ*IOTA First Web3 Europe Hackathon 2026.\n\nStudent: ${selectedRec.studentName}\nPassport: ${selectedRec.passport}\nDate: ${new Date(selectedRec.timestamp).toLocaleString()}\n\nRecommendation:\n"${selectedRec.content}"\n\nIssuer: ${selectedRec.issuerEmail}\nSignature: ${selectedRec.id}`;
+                                const txt = `TRUSTCYCLE VERIFIED - Demo version, Built For the First European Web3 Hackathon by MasterZ*IOTA (2026).\n\nStudent: ${selectedRec.studentName}\nPassport: ${selectedRec.passport}\nDate: ${new Date(selectedRec.timestamp).toLocaleString()}\n\nRecommendation:\n"${selectedRec.content}"\n\nIssuer: ${selectedRec.issuerEmail}\nSignature: ${selectedRec.id}`;
                                 const blob = new Blob([txt], { type: 'text/plain' });
                                 const url = URL.createObjectURL(blob);
                                 const a = document.createElement('a');
