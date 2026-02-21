@@ -17,7 +17,6 @@ app.use(cors());
 /* ======================================================
    0. ENCRYPTION UTILS (For Passport Privacy)
 ====================================================== */
-// Fallback provided for the hackathon demo
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
@@ -55,11 +54,11 @@ const RecSchema = new mongoose.Schema({
     id: String,           
     issuerEmail: String,
     studentName: String,
-    encryptedPassport: String, // SECURE: AES Encrypted Passport
-    passportHash: String,      // SECURE: Hash for searching
+    encryptedPassport: String, 
+    passportHash: String,      
     content: String,      
     contentHash: String,
-    vc: Object, // SECURE: Verifiable Credential (W3C Standard)
+    vc: Object, 
     status: { type: String, default: 'Verified' },
     txDigest: String,
     timestamp: { type: Date, default: Date.now }
@@ -88,31 +87,6 @@ const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ISSUER_MNEMONIC);
 const adminAddress = adminKeypair.toIotaAddress();
 console.log(`🤖 Admin Address loaded: ${adminAddress}`);
 
-/* ======================================================
-   1.1 DID INITIALIZATION (Walletless Issuer Identity)
-====================================================== */
-
-const { IotaIdentityClient } = require('@iota/identity-wasm/node');
-
-let issuerDidDocument = null;
-let issuerDidFragment = null;
-
-async function initDID() {
-    try {
-        const identityClient = new IotaIdentityClient(process.env.IOTA_NODE_URL);
-
-        // Create DID for demo issuer (walletless)
-        const result = await identityClient.createDid(adminKeypair);
-        issuerDidDocument = result.document;
-        issuerDidFragment = result.fragment;
-
-        await identityClient.publishDid(issuerDidDocument);
-
-        console.log("✅ Issuer DID Published:", issuerDidDocument.id().toString());
-    } catch (err) {
-        console.error("DID Initialization Error:", err);
-    }
-}
 /* ======================================================
    2. IN-MEMORY STATE
 ====================================================== */
@@ -227,49 +201,54 @@ app.post('/api/auth/verify-otp', (req, res) => {
 
 /* ======================================================
    6. ISSUE RECOMMENDATION (ON-CHAIN)
-====================================================== */
+===================================================== */
 app.post('/api/issue', async (req, res) => {
   try {
     const { authId, studentName, passport, content, issuerEmail } = req.body;
     if (!authId || !studentName || !passport || !content) return res.status(400).json({ error: "Missing required fields" });
 
-    // Formatting the final immutable content
-    // NOTE: Keeping 'passport' out of this formatted text to ensure DB privacy
+    const hackathonNote = "Demo version for MasterZ*IOTA Europe Hackathon 2026.";
     const dateIssued = new Date().toUTCString();
-    const formattedContent = `\n${content}`;
+    const formattedContent = `*** TRUSTCYCLE VERIFIED (${hackathonNote}) ***\n\nDate: ${dateIssued}\nIssuer: ${issuerEmail}\nStudent: ${studentName}\n\nRecommendation:\n${content}`;
 
     /* ======================================================
-   VC GENERATION + SIGNING (Walletless DID)
-   ====================================================== */
-   const vcPayload = {
-    "@context": [
-        "https://www.w3.org/2018/credentials/v1"
-    ],
-    "type": ["VerifiableCredential", "AcademicRecommendation"],
-    "issuer": issuerDidDocument.id().toString(),
-    "issuanceDate": new Date().toISOString(),
-    "credentialSubject": {
-        "studentName": studentName,
-        "passportHash": sha256(passport),
-        "recommendationText": formattedContent
-    }
-};
+       VC GENERATION + NATIVE Ed25519 SIGNING (Move-Compatible)
+    ====================================================== */
+    const vcPayload = {
+        "@context": ["https://www.w3.org/2018/credentials/v1"],
+        "type": ["VerifiableCredential", "AcademicRecommendation"],
+        "issuer": `did:iota:${adminAddress}`,
+        "issuanceDate": new Date().toISOString(),
+        "credentialSubject": {
+            "studentName": studentName,
+            "passportHash": sha256(passport),
+            "recommendationText": formattedContent
+        }
+    };
 
-// Sign VC using DID
-const signedVc = await issuerDidDocument.signCredential(vcPayload, {
-    method: issuerDidFragment,
-    proofPurpose: "assertionMethod"
-});
+    // Native Signing using the Ed25519Keypair
+    const payloadString = JSON.stringify(vcPayload);
+    const messageBytes = new TextEncoder().encode(payloadString);
+    const { signature } = await adminKeypair.signPersonalMessage(messageBytes);
 
-// Hash entire signed VC
-const vcString = JSON.stringify(signedVc);
-const contentHash = sha256(vcString);
+    const signedVc = {
+        ...vcPayload,
+        "proof": {
+            "type": "Ed25519Signature2018",
+            "created": new Date().toISOString(),
+            "verificationMethod": `did:iota:${adminAddress}#keys-1`,
+            "proofPurpose": "assertionMethod",
+            "proofValue": signature
+        }
+    };
+
+    const vcString = JSON.stringify(signedVc);
+    const contentHash = sha256(vcString);
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
-
     const passportHash = sha256(passport); 
-    const encryptedPassport = encrypt(passport); // AES Encryption
+    const encryptedPassport = encrypt(passport); 
 
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
@@ -292,13 +271,11 @@ const contentHash = sha256(vcString);
     const createdObj = result.objectChanges?.find(o => o.type === 'created' && o.objectType.includes('Recommendation'));
     const recId = createdObj ? createdObj.objectId : 'Unknown';
 
-    console.log(`✅ Transaction Success! Digest: ${result.digest}, RecID: ${recId}`);
-
     const newRecord = new Recommendation({
       id: recId,
       issuerEmail,
       studentName,
-      encryptedPassport, // Storing ONLY the encrypted cipher
+      encryptedPassport, 
       passportHash, 
       content: formattedContent,  
       contentHash,
@@ -322,8 +299,6 @@ const contentHash = sha256(vcString);
 app.post('/api/revoke', async (req, res) => {
     try {
         const { recId } = req.body;
-        console.log(`Revoking recommendation on-chain: ${recId}`);
-        
         const record = await Recommendation.findOne({ id: recId });
         if (!record) return res.status(404).json({error: "Record not found"});
         
@@ -346,9 +321,7 @@ app.post('/api/revoke', async (req, res) => {
         record.status = 'Revoked';
         await record.save();
         res.json({ success: true, txDigest: result.digest });
-
     } catch (e) {
-        console.error("Revoke Error:", e);
         res.status(500).json({ error: "Revocation failed" });
     }
 });
@@ -359,7 +332,6 @@ app.post('/api/revoke', async (req, res) => {
 app.post('/api/student/search', async (req, res) => {
   const { studentName, passport } = req.body;
   if (!studentName || !passport) return res.json([]);
-
   try {
     const searchHash = sha256(passport); 
     let results = await Recommendation.find({
@@ -368,7 +340,6 @@ app.post('/api/student/search', async (req, res) => {
     });
     res.json(results);
   } catch (e) {
-    console.error("Search Error:", e);
     res.status(500).json({ error: "Search failed" });
   }
 });
@@ -379,14 +350,12 @@ app.get('/api/verify/:id', async (req, res) => {
     const record = await Recommendation.findOne({ id });
     if (!record) return res.status(404).json({ error: 'Recommendation not found' });
 
-    // Decrypt Passport on-the-fly for the University
     let decryptedPassport = '';
     if (record.encryptedPassport) {
         try { decryptedPassport = decrypt(record.encryptedPassport); } 
         catch (err) { console.error("Decryption failed", err); }
     }
 
-    // Trustless Verification: Cross-reference with IOTA Blockchain state
     try {
         const onChainObj = await client.getObject({ id, options: { showContent: true } });
         if (onChainObj.data && onChainObj.data.content) {
@@ -397,18 +366,12 @@ app.get('/api/verify/:id', async (req, res) => {
             }
         }
     } catch (chainErr) {
-        console.warn("Could not cross-reference with blockchain:", chainErr.message);
+        console.warn("Blockchain check failed:", chainErr.message);
     }
 
-    // Return the response with the decrypted passport appended
-    const responseData = {
-        ...record.toObject(),
-        passport: decryptedPassport 
-    };
-
+    const responseData = { ...record.toObject(), passport: decryptedPassport };
     res.json(responseData);
   } catch (e) {
-      console.error("Verify Error:", e);
       res.status(500).json({ error: "Verification failed" });
   }
 });
@@ -420,17 +383,13 @@ app.get('/api/vc/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const record = await Recommendation.findOne({ id });
-    
-    if (!record || !record.vc) return res.status(404).json({ error: 'Verifiable Credential not found' });
-    if (record.status === 'Revoked') return res.status(400).json({ error: 'This credential has been revoked.' });
+    if (!record || !record.vc) return res.status(404).json({ error: 'VC not found' });
+    if (record.status === 'Revoked') return res.status(400).json({ error: 'Revoked' });
 
-    // Return the signed VC in W3C format
     res.setHeader('Content-Type', 'application/ld+json');
     res.json(record.vc);
-
   } catch (e) {
-      console.error("VC Fetch Error:", e);
-      res.status(500).json({ error: "Failed to fetch Verifiable Credential" });
+      res.status(500).json({ error: "Failed" });
   }
 });
 
@@ -438,8 +397,6 @@ app.get('/api/vc/:id', async (req, res) => {
    9. SERVER START
 ====================================================== */
 const PORT = process.env.PORT || 3001;
-initDID();
 app.listen(PORT, '0.0.0.0' , () => {
-  console.log(`🚀 TrustCycle Backend is live on port ${PORT}`);
-  console.log(`🔗 Connected to IOTA Node`);
+  console.log(`🚀 TrustCycle Backend live on port ${PORT}`);
 });
