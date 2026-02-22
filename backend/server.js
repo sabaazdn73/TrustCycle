@@ -385,18 +385,23 @@ app.get('/api/vc/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const record = await Recommendation.findOne({ id });
+    
     if (!record || !record.vc) return res.status(404).json({ error: 'VC not found' });
     if (record.status === 'Revoked') return res.status(400).json({ error: 'Revoked' });
 
     const portableCredential = {
       network: "iota-testnet",
-      onChainObjectId: record.id,
+      onChainObjectId: record.id, 
       credential: record.vc
-      };
+    };
 
-    res.setHeader('Content-Type', 'application/ld+json');
-    res.json(record.vc);
+    res.setHeader('Content-Type', 'application/json');
+    
+    //send record.vc
+    res.json(portableCredential); 
+
   } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed" });
   }
 });

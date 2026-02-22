@@ -1,0 +1,23 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "AcademicRecommendation"
+  ],
+  "issuer": "did:iota:0xf903ef1916cefa6821e38786b5402b1f805bff8f900dd01e4d574ff86f6fd543",
+  "issuanceDate": "2026-02-22T10:14:24.124Z",
+  "credentialSubject": {
+    "studentName": "Saba Fendi",
+    "passportHash": "ef8d44e6f66e35c23a3a5f4073c2ded815f52053ca5cfca267aa1fa211ae7056",
+    "recommendationText": "\nNew one."
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "created": "2026-02-22T10:14:24.424Z",
+    "verificationMethod": "did:iota:0xf903ef1916cefa6821e38786b5402b1f805bff8f900dd01e4d574ff86f6fd543#keys-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "AP4Xz9QAE6uGg6c7fidLgZfzhxQE42hu6J0jtlY8TIZDkctS+HbHG3e/LhF2fXeOyg632oZav3mi8WP5pKJteQmaDHvyudV/a0a7SscJkg6e2xN8hoU3huS/unb9OHdUqg=="
+  }
+}
