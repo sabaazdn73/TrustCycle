@@ -388,6 +388,12 @@ app.get('/api/vc/:id', async (req, res) => {
     if (!record || !record.vc) return res.status(404).json({ error: 'VC not found' });
     if (record.status === 'Revoked') return res.status(400).json({ error: 'Revoked' });
 
+    const portableCredential = {
+      network: "iota-testnet",
+      onChainObjectId: record.id,
+      credential: record.vc
+      };
+
     res.setHeader('Content-Type', 'application/ld+json');
     res.json(record.vc);
   } catch (e) {
