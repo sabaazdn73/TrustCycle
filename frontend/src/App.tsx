@@ -412,29 +412,7 @@ export default function App() {
   };
 
   return (
-    <>
-    <style>
-      {`
-        * {
-          overflow-wrap: anywhere;
-          word-break: normal;
-        }
-        code, p, div, span {
-          word-break: break-all; 
-          overflow-wrap: break-word;
-        }
-
-        ::-webkit-scrollbar {
-          width: 5px;
-          height: 5px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #9333ea66;
-          border-radius: 10px;
-        }
-      `}
-    </style>
-    <div style={centeredLayout}></div>
+    
     <div style={centeredLayout}>
       <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
       {/* ---  MasterZ logo on mobile --- */}
@@ -1047,6 +1025,5 @@ export default function App() {
         </p>
       </div>
     </div>
-    <></></>
   );
-;}
+}
