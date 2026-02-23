@@ -929,10 +929,10 @@ export default function App() {
               <div style={{ 
                 marginTop: '20px', background: '#0a0a0a', border: '1px solid #333', 
                 borderRadius: '8px', padding: '15px', textAlign: 'left', fontFamily: 'monospace',
-                fontSize: '12px', color: '#00ff00', maxHeight: '150px', overflowY: 'auto'
+                fontSize: '12px', color: '#f6ff00', maxHeight: '150px', overflowY: 'auto'
               }}>
                 {verifyLogs.map((log, i) => (
-                  <div key={i} style={{ color: log.includes('❌') ? '#ff4444' : log.includes('✅') ? '#00ff00' : '#aaa', marginBottom: 4 }}>
+                  <div key={i} style={{ color: log.includes('❌') ? '#ff4444' : log.includes('✅') ? '#d3a0e3' : '#aaa', marginBottom: 4 }}>
                     {log}
                   </div>
                 ))}
@@ -949,7 +949,7 @@ export default function App() {
                 
                 {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') ? (
                   <button 
-                    style={buttonStyle('#4ade80')} 
+                    style={buttonStyle('#e8da22')} 
                     onClick={() => {
                       // Extract base 64 from recomm
                       const base64Data = verifiedVC.credential.credentialSubject.recommendationText.split('base64,')[1];
