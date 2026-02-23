@@ -416,6 +416,21 @@ export default function App() {
     );
   };
 
+
+  const downloadPdfFromBase64 = (base64String: string, fileName: string) => {
+  try {
+    const base64Data = base64String.split('base64,')[1];
+    const link = document.createElement("a");
+    link.href = `data:application/pdf;base64,${base64Data}`;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    alert("Error processing PDF file.");
+  }
+};
+
   return (
     
     <div style={centeredLayout}>
@@ -423,8 +438,8 @@ export default function App() {
       {/* ---  MasterZ logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
-        top: isMobile ? 15 : 32,    
-        left: isMobile ? 15 : 32,   
+        top: isMobile ? 10 : 20,    
+        left: isMobile ? 10 : 20,   
         zIndex: 20 
       }}>
         <img 
@@ -774,6 +789,14 @@ export default function App() {
                 <h3 style={{ margin: 0, color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444' }}>
                   {selectedRec.status === 'Verified' ? 'Authentic Document' : 'Invalid'}
                 </h3>
+                {selectedRec.content.startsWith('file:') && (
+                  <button 
+                    style={{ ...buttonStyle('#22c55e'), marginTop: 10 }} 
+                    onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
+                    >
+                      📥 Download Official PDF Document
+                      </button>
+                 )}
                 
                 {selectedRec.status === 'Verified' && (
                   <div style={{ marginTop: 20, textAlign: 'left' }}>
@@ -795,7 +818,7 @@ export default function App() {
         )}
 
         {/* ======================================================
-            PANEL: VERIFIER (STAY CONSISTENT)
+            PANEL: VERIFIER
         ====================================================== */}
         {panel === 'verifier' && (
           <>
@@ -816,11 +839,23 @@ export default function App() {
               <div style={{ marginTop: 20, padding: 15, background: 'rgba(74, 222, 128, 0.1)', borderRadius: 10, border: '1px solid #4ade8044', textAlign: 'left' }}>
                 <h4 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>✨ Verified Successfully</h4>
                 <p style={{ fontSize: 12, margin: 0 }}><b>Student:</b> {verifiedVC.credential.credentialSubject.studentName}</p>
-              </div>
+            
+            {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') && (
+              <button 
+                style={{ ...buttonStyle('#c084fc'), marginTop: 15 }} 
+                onClick={() => downloadPdfFromBase64(
+                  verifiedVC.credential.credentialSubject.recommendationText, 
+                  `Verified_Doc_${verifiedVC.credential.credentialSubject.studentName}.pdf`
+                )}
+              >
+                ⬇️ Download Decrypted PDF
+              </button>
             )}
-          </>
+         </div>
         )}
-      </div> {/* END OF CARD */}
+      </>
+     )}
+     </div>
 
       {/* ======================================================
           FOOTER SECTION
@@ -830,12 +865,15 @@ export default function App() {
           marginTop: isMobile ? '40px' : 0, paddingBottom: isMobile ? '20px' : 0, zIndex: 30, textAlign: isMobile ? 'center' : 'right'
       }}>
         <p style={{ fontSize: '11px', color: '#817d7de9', margin: 0, fontFamily: 'monospace' }}>
-          Crafted by <a href="https://www.linkedin.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Saba Azadegan</a> for MasterZ*IOTA
+          Crafted by <a href="https://www.linkedin.com/in/saba-azadegan-2974b622a" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Saba Azadegan</a>
+          {' '} for
+          <a href="https://blog.iota.org/masterz-hackathon" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> MasterZ*IOTA</a>
         </p>
-        <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace' }}>
-          <a href="https://drive.google.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Docs</a>
+        
+        <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace', textAlign: 'center'}}>
+          <a href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Docs</a>
           {' . '}
-          <a href="https://github.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
+          <a href="https://github.com/sabaazdn73/TrustCycle-DRS" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
           {' . '}
           <TechnicalAssistant />
         </p>
