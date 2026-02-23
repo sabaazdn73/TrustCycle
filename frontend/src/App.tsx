@@ -1,7 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect} from 'react';
 import BackgroundGlobe from './BackgroundGlobe';
 import TechnicalAssistant from './TecnicalAssistant';
-// signiture verification imports
 import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
 import { verifyPersonalMessageSignature } from '@iota/iota-sdk/verify';
 
@@ -23,7 +22,6 @@ function useWindowSize() {
   }, []);
   return size;
 }
-
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
   const [demoOtp, setDemoOtp] = useState<string>(''); 
@@ -46,11 +44,9 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState('');
   const [studentRefInput, setStudentRefInput] = useState('');
   const [uniRefInput, setUniRefInput] = useState('');
-  // --- Verifier States ---
   const [verifyLogs, setVerifyLogs] = useState<string[]>([]);
   const [verifiedVC, setVerifiedVC] = useState<any>(null);
   const [verifyStatus, setVerifyStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  // --- Responsive Logic ---
   const [width] = useWindowSize();
   const isMobile = width < 768; 
 
@@ -168,7 +164,6 @@ export default function App() {
     }
   };
 
-
   const handleIssue = async () => {
     setLoading(true);
     try {
@@ -205,7 +200,6 @@ export default function App() {
       setLoading(false);
     }
   };
-
 
   const handleRevoke = async (recId: string) => {
     if(!confirm("Are you sure you want to revoke this recommendation? This action is irreversible on-chain.")) return;
@@ -357,7 +351,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-
   const resetFlow = (nextPanel: Panel) => {
     setPanel(nextPanel);
     setStep(1);
@@ -480,7 +473,6 @@ export default function App() {
         ))}
       </div>
       <div style={cardStyle}>
- 
 
         {panel === 'provider' && (
           <>
@@ -494,7 +486,6 @@ export default function App() {
             {statusMsg && <p style={{ color: THEME.accent, marginTop: '10px', fontSize: 14 }}>{statusMsg}</p>}
           </>
         )}
-
 
         {panel === 'professor' && (
           <>
@@ -657,7 +648,6 @@ export default function App() {
           </>
         )}
 
-
         {panel === 'student' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Student Vault</h2>
@@ -756,7 +746,6 @@ export default function App() {
             )}
           </>
         )}
-
 
         {panel === 'university' && (
           <>
@@ -915,7 +904,6 @@ export default function App() {
         )}
       </div>
 
-
       <div style={{ 
           position: isMobile ? 'relative' : 'absolute',
           bottom: isMobile ? 'auto' : 20,
@@ -990,6 +978,8 @@ export default function App() {
           >
             GitHub
           </a>
+          {' . '}
+          <TechnicalAssistant />
         </p>
       </div>
     </div>
