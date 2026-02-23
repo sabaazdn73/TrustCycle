@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import Globe, { type GlobeMethods } from 'react-globe.gl';
+import BackgroundGlobe from './BackgroundGlobe';
+import TechnicalAssistant from './TecnicalAssistant';
 // signiture verification imports
 import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
 import { verifyPersonalMessageSignature } from '@iota/iota-sdk/verify';
@@ -12,7 +13,6 @@ const THEME = {
 };
 
 type Panel = 'professor' | 'student' | 'university' | 'verifier'| 'provider';
-
 // --- Custom Hook for Responsive Design ---
 function useWindowSize() {
   const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
@@ -24,60 +24,6 @@ function useWindowSize() {
   return size;
 }
 
-const BackgroundGlobe = () => {
-  const globeEl = useRef<GlobeMethods | undefined>(undefined);
-  // --- Use hook to adjust globe position on mobile ---
-  const [width] = useWindowSize();
-  const isMobile = width < 768;
-
-  const arcsData = useMemo(() => [...Array(25).keys()].map(() => ({
-    startLat: (Math.random() - 0.5) * 180,
-    startLng: (Math.random() - 0.5) * 360,
-    endLat: (Math.random() - 0.5) * 180,
-    endLng: (Math.random() - 0.5) * 360,
-    color: ['#ffffff', '#9333ea', '#6366f1'][Math.floor(Math.random() * 3)],
-  })), []);
-
-  useEffect(() => {
-    if (globeEl.current) {
-      globeEl.current.pointOfView({ lat: 25, lng: 40, altitude: 1.7 });
-      globeEl.current.controls().autoRotate = true;
-      globeEl.current.controls().autoRotateSpeed = 0.5;
-      globeEl.current.controls().enableZoom = false;
-    }
-  }, []);
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: isMobile ? 0 : '30%',
-      width: isMobile ? '100vw' : '100%',
-      height: '100%',
-      zIndex: 0,
-      pointerEvents: 'none'
-    }}>
-      <Globe
-        ref={globeEl}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundColor="rgba(0,0,0,0)"
-        width={window.innerWidth}
-        height={window.innerHeight}
-        showAtmosphere={true}
-        atmosphereColor={THEME.accent}
-        atmosphereAltitude={0.2}
-        arcsData={arcsData}
-        arcColor="color"
-        arcDashLength={0.5}
-        arcDashGap={2}
-        arcDashAnimateTime={2000}
-        arcStroke={0.4}
-      />
-    </div>
-  );
-};
-
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
   const [demoOtp, setDemoOtp] = useState<string>(''); 
@@ -85,9 +31,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [issuedRef, setIssuedRef] = useState<string>('');
   const [identity, setIdentity] = useState<{ fullName: string, title?: string, photo?: string, org?: string, verifiedAcademic?: boolean } | null>(null);
-  
   const [canProceed, setCanProceed] = useState(false);
-
   const [studentName, setStudentName] = useState('');
   const [passport, setPassport] = useState('');
   const [content, setContent] = useState('');
@@ -95,21 +39,17 @@ export default function App() {
   const [history, setHistory] = useState<any[]>([]);
   const [searchRes, setSearchRes] = useState<any[]>([]);
   const [selectedRec, setSelectedRec] = useState<any>(null);
-
   const [emailInput, setEmailInput] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
-  
   const [studentRefInput, setStudentRefInput] = useState('');
   const [uniRefInput, setUniRefInput] = useState('');
-
   // --- Verifier States ---
   const [verifyLogs, setVerifyLogs] = useState<string[]>([]);
   const [verifiedVC, setVerifiedVC] = useState<any>(null);
   const [verifyStatus, setVerifyStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
   // --- Responsive Logic ---
   const [width] = useWindowSize();
   const isMobile = width < 768; 
@@ -468,8 +408,8 @@ export default function App() {
 
   return (
     <div style={centeredLayout}>
-      <BackgroundGlobe />
-
+      <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
+      <TechnicalAssistant />
       {/* ---  MasterZ logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
