@@ -739,7 +739,7 @@ export default function App() {
                 <div style={{ marginTop: 12, borderTop: '1px solid #333', paddingTop: 12 }}>
                     <div style={{ marginBottom: 10 }}>
                         <p style={{fontSize: 11, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
-                        <code style={{fontSize: 12, color: THEME.accent, wordBreak: 'break-all', display: 'block'}}>{selectedRec.id}</code>
+                        <code style={{fontSize: 12, color: THEME.accent, wordBreak: 'break-all', display: 'block', maxHeight: '150px', overflowY: 'auto'}}>{selectedRec.id}</code>
                     </div>
 
                     <div>
@@ -790,7 +790,7 @@ export default function App() {
                         <div style={{ textAlign: 'left', background: '#000', padding: 15, borderRadius: 8, marginBottom: 15 }}>
                             <p style={{ fontSize: 11, color: '#666', margin: '0 0 8px 0', fontWeight: 'bold' }}>RECOMMENDATION TEXT</p>
                             <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.5, margin: 0 }}>"{selectedRec.content}"</p>
-                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#aaa' }}>
+                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#aaa' , wordBreak: 'break-all', maxHeight: '150px', overflowY: 'auto'}}>
                                 <span>Student: {selectedRec.studentName}</span>
                                 <span>Passport: {selectedRec.passport}</span>
                             </div>
@@ -838,81 +838,111 @@ export default function App() {
         )}
       
         {panel === 'verifier' && (
-          <>
-            <h2 style={{ color: THEME.accent, marginTop: 0 }}>Standalone VC Verifier</h2>
-            <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>
-              Verify a TrustCycle JSON credential completely offline and client-side via IOTA cryptography.
-            </p>
-            
-            <div style={{
-              border: `2px dashed ${THEME.accent}`, 
-              borderRadius: '12px', 
-              padding: '30px', 
-              background: 'rgba(147, 51, 234, 0.05)',
-              position: 'relative',
-              cursor: 'pointer'
+  <>
+    <h2 style={{ color: THEME.accent, marginTop: 0, letterSpacing: '1px' }}>
+      🛡️ Standalone VC Verifier
+    </h2>
+    <p style={{ fontSize: 13, color: '#aaa', marginBottom: 20, lineHeight: '1.6' }}>
+      Verify a TrustCycle JSON credential completely offline and client-side via IOTA cryptography.
+    </p>
+    
+    <div style={{
+      border: `2px dashed ${THEME.accent}66`, 
+      borderRadius: '16px', 
+      padding: '40px 20px', 
+      background: 'rgba(147, 51, 234, 0.03)',
+      position: 'relative',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    }}>
+      <input 
+        type="file" 
+        accept=".json" 
+        onChange={handleVerifyUploadedVC}
+        style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'
+        }}
+      />
+      <div style={{ fontSize: '45px', marginBottom: '15px', filter: 'drop-shadow(0 0 10px #9333ea66)' }}>🔮</div>
+      <p style={{ margin: 0, fontWeight: 'bold', color: '#e9d5ff', letterSpacing: '0.5px' }}>
+        Drop JSON Credential Here
+      </p>
+      <p style={{ fontSize: '11px', color: '#666', marginTop: '5px' }}>Click to browse your files</p>
+    </div>
+
+    {/* Terminal Logs Window -*/}
+    {verifyLogs.length > 0 && (
+      <div style={{ 
+        marginTop: '25px', background: '#080808', border: '1px solid #222', 
+        borderRadius: '12px', padding: '15px', textAlign: 'left', fontFamily: 'monospace',
+        fontSize: '12px', color: '#d8b4fe', maxHeight: '180px', overflowY: 'auto',
+        boxShadow: 'inset 0 0 20px #000'
+      }}>
+        {verifyLogs.map((log, i) => (
+          <div key={i} style={{ 
+            color: log.includes('❌') ? '#ff6b6b' : log.includes('✅') ? '#c084fc' : '#777', 
+            marginBottom: 6,
+            display: 'flex',
+            gap: '8px'
+          }}>
+            <span style={{ color: '#444' }}>[{new Date().toLocaleTimeString([], {hour12: false})}]</span>
+            {log}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Display Verified Data - */}
+    {verifyStatus === 'success' && verifiedVC && (
+      <div style={{ 
+        marginTop: '25px', textAlign: 'left', background: 'linear-gradient(145deg, rgba(147,51,234,0.1), rgba(0,0,0,0.4))', 
+        padding: '20px', borderRadius: '16px', border: '1px solid #9333ea33' 
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h3 style={{ color: '#fff', margin: 0, fontSize: '16px' }}>✨ Verified Subject Data</h3>
+          <span style={{ background: '#22c55e', color: '#fff', fontSize: '10px', padding: '2px 8px', borderRadius: '100px', fontWeight: 'bold' }}>AUTHENTIC</span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+           <p style={{ margin: 0, fontSize: '13px', color: '#bbb' }}>
+             <b style={{ color: '#ddd' }}>Student:</b> {verifiedVC.credential.credentialSubject.studentName}
+           </p>
+           <p style={{ margin: 0, fontSize: '11px', color: '#666', wordBreak: 'break-all' }}>
+             <b style={{ color: '#888' }}>Issuer DID:</b> {verifiedVC.credential.issuer}
+           </p>
+        </div>
+
+        <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '15px 0' }} />
+        
+        {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') ? (
+          <button 
+            style={buttonStyle(THEME.accent)} 
+            onClick={() => {
+              const base64Data = verifiedVC.credential.credentialSubject.recommendationText.split('base64,')[1];
+              const link = document.createElement("a");
+              link.href = `data:application/pdf;base64,${base64Data}`;
+              link.download = `Verified_Document_${verifiedVC.credential.credentialSubject.studentName}.pdf`;
+              link.click();
+            }}
+          >
+            📥 Download Verified PDF
+          </button>
+        ) : (
+          <div>
+            <b style={{fontSize: '11px', color: '#9333ea', letterSpacing: '1px'}}>DECRYPTED CONTENT</b>
+            <p style={{ 
+              fontSize: '13px', color: '#eee', background: 'rgba(0,0,0,0.5)', 
+              padding: '12px', borderRadius: '10px', marginTop: '8px', 
+              borderLeft: `3px solid ${THEME.accent}`, fontStyle: 'italic' 
             }}>
-              <input 
-                type="file" 
-                accept=".json" 
-                onChange={handleVerifyUploadedVC}
-                style={{
-                  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'
-                }}
-              />
-              <div style={{ fontSize: '40px', marginBottom: '10px' }}>📄</div>
-              <p style={{ margin: 0, fontWeight: 'bold', color: THEME.accent }}>Click or Drag JSON VC Here</p>
-            </div>
-
-            {/* Terminal Logs Window */}
-            {verifyLogs.length > 0 && (
-              <div style={{ 
-                marginTop: '20px', background: '#0a0a0a', border: '1px solid #333', 
-                borderRadius: '8px', padding: '15px', textAlign: 'left', fontFamily: 'monospace',
-                fontSize: '12px', color: '#f6ff00', maxHeight: '150px', overflowY: 'auto'
-              }}>
-                {verifyLogs.map((log, i) => (
-                  <div key={i} style={{ color: log.includes('❌') ? '#ff4444' : log.includes('✅') ? '#d3a0e3' : '#aaa', marginBottom: 4 }}>
-                    {log}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Display Verified Data & Download PDF if it exists */}
-            {verifyStatus === 'success' && verifiedVC && (
-              <div style={{ marginTop: '20px', textAlign: 'left', background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px' }}>
-                <h3 style={{ color: '#f3ed71', margin: '0 0 10px 0' }}>Verified Subject Data</h3>
-                <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Student:</b> {verifiedVC.credential.credentialSubject.studentName}</p>
-                <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Issuer:</b> {verifiedVC.credential.issuer}</p>
-                <hr style={{ borderColor: '#333', margin: '15px 0' }} />
-                
-                {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') ? (
-                  <button 
-                    style={buttonStyle('#e8da22')} 
-                    onClick={() => {
-                      // Extract base 64 from recomm
-                      const base64Data = verifiedVC.credential.credentialSubject.recommendationText.split('base64,')[1];
-                      const link = document.createElement("a");
-                      link.href = `data:application/pdf;base64,${base64Data}`;
-                      link.download = `Verified_Document_${verifiedVC.credential.credentialSubject.studentName}.pdf`;
-                      link.click();
-                    }}
-                  >
-                    ⬇️ Download Embedded PDF
-                  </button>
-                ) : (
-                  <div>
-                    <b style={{fontSize: '12px', color: '#888'}}>RECOMMENDATION TEXT:</b>
-                    <p style={{ fontSize: '14px', fontStyle: 'italic', background: '#000', padding: '10px', borderRadius: '8px' }}>
-                      "{verifiedVC.credential.credentialSubject.recommendationText}"
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
+              "{verifiedVC.credential.credentialSubject.recommendationText}"
+            </p>
+          </div>
         )}
+      </div>
+    )}
+  </>
+)}
       </div>
 
       <div style={{ 
