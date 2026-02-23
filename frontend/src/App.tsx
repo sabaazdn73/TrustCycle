@@ -539,7 +539,7 @@ export default function App() {
           </button>
         ))}
       </div>
-//========== Provider Panel ===//=== =====================================================
+//========== Provider Panel ===//=== ====================================================
       <div style={cardStyle}>
         {panel === 'provider' && (
           <>
