@@ -203,7 +203,6 @@ app.post('/api/auth/verify-otp', (req, res) => {
 /* ======================================================
    6. ISSUE RECOMMENDATION (ON-CHAIN) - Supporting Text & PDF
 ===================================================== */
-
 const multer = require('multer');
 const storage = multer.memoryStorage(); // store temporary to convert Base64
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -234,7 +233,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
         "credentialSubject": {
             "studentName": studentName,
             "passportHash": sha256(passport),
-            "recommendationText": formattedContent
+            "recommendationText": finalContent,
         }
     };
 
