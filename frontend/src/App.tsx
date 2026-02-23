@@ -1,8 +1,6 @@
 import { useState, useEffect} from 'react';
 import BackgroundGlobe from './BackgroundGlobe';
 import TechnicalAssistant from './TechnicalAssistant';
-import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
-import { verifyPersonalMessageSignature } from '@iota/iota-sdk/verify';
 
 const THEME = {
   bg: '#050505',
@@ -14,12 +12,17 @@ const THEME = {
 type Panel = 'professor' | 'student' | 'university' | 'verifier'| 'provider';
 // --- Custom Hook for Responsive Design ---
 function useWindowSize() {
-  const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
+  const [size, setSize] = useState<[number, number]>([0, 0]);
+
   useEffect(() => {
-    const handleResize = () => setSize([window.innerWidth, window.innerHeight]);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    if (typeof window !== 'undefined') {
+      const updateSize = () => setSize([window.innerWidth, window.innerHeight]);
+      updateSize();
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
   }, []);
+
   return size;
 }
 export default function App() {
@@ -298,6 +301,8 @@ export default function App() {
   };
   //--- Verifier Logic ---
   const handleVerifyUploadedVC = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { IotaClient, getFullnodeUrl } = await import('@iota/iota-sdk/client');
+    const { verifyPersonalMessageSignature } = await import('@iota/iota-sdk/verify');
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -836,4 +841,5 @@ export default function App() {
         </p>
       </div>
     </div>
-  );}
+  );
+}
