@@ -519,7 +519,7 @@ export default function App() {
         flexWrap: 'wrap',
         justifyContent: 'center'
       }}>
-        {(['professor', 'student', 'university', 'provider'] as Panel[]).map(p => (
+        {(['professor', 'student', 'university', 'verifier', 'provider'] as Panel[]).map(p => (
           <button 
             key={p} 
             onClick={() => resetFlow(p)} 
