@@ -539,8 +539,9 @@ export default function App() {
           </button>
         ))}
       </div>
-//========== Provider Panel ===//=== ====================================================
       <div style={cardStyle}>
+ 
+
         {panel === 'provider' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Provider Admin</h2>
@@ -553,7 +554,8 @@ export default function App() {
             {statusMsg && <p style={{ color: THEME.accent, marginTop: '10px', fontSize: 14 }}>{statusMsg}</p>}
           </>
         )}
-//========== Professor Panel ===//=== =======================================================
+
+
         {panel === 'professor' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Professor Portal</h2>
@@ -714,7 +716,8 @@ export default function App() {
             )}
           </>
         )}
-//========== Student Panel ===//=== =======================================================
+
+
         {panel === 'student' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Student Vault</h2>
@@ -813,7 +816,8 @@ export default function App() {
             )}
           </>
         )}
-//========== University Panel ===//=== =======================================================
+
+
         {panel === 'university' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
@@ -861,7 +865,7 @@ export default function App() {
                                 {loading ? "Fetching VC..." : "⬇️ Download Official VC (JSON)"}
                             </button>
 
-//========== Plain Text ===                      
+               
                             <button 
                                 style={{ ...buttonStyle('#222'), marginTop: 0 }}
                                 onClick={() => {
@@ -893,7 +897,8 @@ export default function App() {
           </>
         )}
       </div>
-//========== Verifier Panel ===//=== ================================================
+
+
 
         {panel === 'verifier' && (
           <>
@@ -973,7 +978,7 @@ export default function App() {
         )}
 
 
-//========== Design ===//=== =======================================================
+
       <div style={{ 
           position: isMobile ? 'relative' : 'absolute',
           bottom: isMobile ? 'auto' : 20,
