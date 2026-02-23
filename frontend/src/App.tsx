@@ -896,10 +896,7 @@ export default function App() {
             )}
           </>
         )}
-      </div>
-
-
-
+      
         {panel === 'verifier' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Standalone VC Verifier</h2>
@@ -976,7 +973,7 @@ export default function App() {
             )}
           </>
         )}
-
+      </div>
 
 
       <div style={{ 
