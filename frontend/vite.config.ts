@@ -7,16 +7,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Load faster
-          if (id.includes('@iota')) {
-            return 'iota-sdk';
-          }
-          if (id.includes('react-globe.gl') || id.includes('three')) {
-            return 'globe-visuals';
-          }
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+          if (id.includes('@iota')) return 'iota-sdk';
+          if (id.includes('react-globe.gl') || id.includes('three')) return 'globe-visuals';
+          if (id.includes('node_modules')) return 'vendor';
         },
       },
     },
