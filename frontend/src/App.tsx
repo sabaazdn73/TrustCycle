@@ -402,7 +402,6 @@ export default function App() {
   return (
     <div style={centeredLayout}>
       <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
-      <TechnicalAssistant />
       {/* ---  MasterZ logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
