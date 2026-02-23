@@ -1,6 +1,6 @@
 import { useState, useEffect} from 'react';
 import BackgroundGlobe from './BackgroundGlobe';
-import TechnicalAssistant from './TecnicalAssistant';
+import TechnicalAssistant from './TechnicalAssistant';
 import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
 import { verifyPersonalMessageSignature } from '@iota/iota-sdk/verify';
 
@@ -871,7 +871,7 @@ export default function App() {
             {/* Display Verified Data & Download PDF if it exists */}
             {verifyStatus === 'success' && verifiedVC && (
               <div style={{ marginTop: '20px', textAlign: 'left', background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px' }}>
-                <h3 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>Verified Subject Data</h3>
+                <h3 style={{ color: '#f3ed71', margin: '0 0 10px 0' }}>Verified Subject Data</h3>
                 <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Student:</b> {verifiedVC.credential.credentialSubject.studentName}</p>
                 <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Issuer:</b> {verifiedVC.credential.issuer}</p>
                 <hr style={{ borderColor: '#333', margin: '15px 0' }} />
