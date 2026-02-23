@@ -169,6 +169,14 @@ export default function App() {
   };
 
   const handleIssue = async () => {
+    if (!studentName || !passport) {
+      alert("Please fill student name and passport.");
+      return;
+    }
+    if (!content && !pdfFile) {
+      alert("Please provide recommendation text OR upload a PDF.");
+      return;
+    }
     setLoading(true);
     try {
       // Support pdf or text content, require at least one
@@ -198,8 +206,8 @@ export default function App() {
       } else {
         alert(data.error || 'Issue failed');
       }
-    } catch (e) {
-      alert('Network/Backend error during issuance.');
+    } catch (e: any) {
+      alert('Network/Backend error during issuance: ' + e.message);
     } finally {
       setLoading(false);
     }
