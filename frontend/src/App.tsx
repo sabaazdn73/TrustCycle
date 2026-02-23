@@ -99,6 +99,10 @@ export default function App() {
   };
 
   const handleProfessorAuth = async () => {
+    if (!emailInput || !fullNameInput) {
+      alert("Please enter both Name and Email");
+      return;
+    }
     setLoading(true);
     setStatusMsg('Verifying identity — this may take a few seconds...');
     try {
