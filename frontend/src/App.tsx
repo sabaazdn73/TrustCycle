@@ -1,5 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Globe, { type GlobeMethods } from 'react-globe.gl';
+// signiture verification imports
+import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
+import { verifyPersonalMessageSignature } from '@iota/iota-sdk/verify';
 
 const THEME = {
   bg: '#050505',
@@ -8,7 +11,7 @@ const THEME = {
   text: '#ffffff',
 };
 
-type Panel = 'professor' | 'student' | 'university' | 'provider';
+type Panel = 'professor' | 'student' | 'university' | 'verifier'| 'provider';
 
 // --- Custom Hook for Responsive Design ---
 function useWindowSize() {
@@ -101,6 +104,11 @@ export default function App() {
   
   const [studentRefInput, setStudentRefInput] = useState('');
   const [uniRefInput, setUniRefInput] = useState('');
+
+  // --- Verifier States ---
+  const [verifyLogs, setVerifyLogs] = useState<string[]>([]);
+  const [verifiedVC, setVerifiedVC] = useState<any>(null);
+  const [verifyStatus, setVerifyStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   // --- Responsive Logic ---
   const [width] = useWindowSize();
@@ -220,18 +228,30 @@ export default function App() {
     }
   };
 
+
   const handleIssue = async () => {
     setLoading(true);
     try {
+      // Support pdf or text content, require at least one
+      const formData = new FormData();
+      formData.append('studentName', studentName);
+      formData.append('passport', passport);
+      formData.append('issuerEmail', emailInput);
+      formData.append('issuerName', identity?.fullName || fullNameInput);
+      formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7");
+
+      // Logic: send pdf or content, backend wil andle it
+      if (pdfFile) {
+        formData.append('file', pdfFile);
+      } else {
+        formData.append('content', content);
+      }
+
       const res = await fetch('https://trustcycle-drs.onrender.com/api/issue', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentName, passport, content, issuerEmail: emailInput,
-          issuerName: identity?.fullName || fullNameInput,
-          authId: "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7",
-          hasFile: !!pdfFile
-        })
+        method: 'POST',
+        body: formData 
       });
+      
       const data = await res.json();
       if (res.ok) {
         setIssuedRef(data.recId);
@@ -245,6 +265,7 @@ export default function App() {
       setLoading(false);
     }
   };
+
 
   const handleRevoke = async (recId: string) => {
     if(!confirm("Are you sure you want to revoke this recommendation? This action is irreversible on-chain.")) return;
@@ -329,6 +350,73 @@ export default function App() {
       setLoading(false);
     }
   };
+  //--- Verifier Logic ---
+  const handleVerifyUploadedVC = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVerifyStatus('loading');
+    setVerifiedVC(null);
+    setVerifyLogs(["🔍 Reading VC file..."]);
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const jsonText = event.target?.result as string;
+        const fileData = JSON.parse(jsonText);
+        const { onChainObjectId, credential } = fileData;
+        
+        setVerifyLogs(prev => [...prev, "✅ File parsed. Checking Ed25519 signature..."]);
+
+        // --- Step 1: Offline Cryptographic Check ---
+        const signature = credential.proof.proofValue;
+        const issuerAddress = credential.issuer.replace('did:iota:', '');
+
+        // Recreate te exact payload
+        const vcPayloadForVerification = {
+            "@context": credential["@context"],
+            "type": credential.type,
+            "issuer": credential.issuer,
+            "issuanceDate": credential.issuanceDate,
+            "credentialSubject": credential.credentialSubject
+        };
+
+        const payloadString = JSON.stringify(vcPayloadForVerification);
+        const messageBytes = new TextEncoder().encode(payloadString);
+        
+        const publicKey = await verifyPersonalMessageSignature(messageBytes, signature);
+        const recoveredAddress = publicKey.toIotaAddress();
+
+        if (recoveredAddress !== issuerAddress) {
+            throw new Error("Signature is invalid or file was tampered with!");
+        }
+        setVerifyLogs(prev => [...prev, "✅ Step 1: Signature is VALID. Content is authentic."]);
+
+        // --- Step 2: On-Chain IOTA Check ---
+        setVerifyLogs(prev => [...prev, "🌐 Connecting to IOTA Rebased Testnet..."]);
+        const client = new IotaClient({ url: getFullnodeUrl('testnet') });
+        
+        const onChainObj = await client.getObject({
+            id: onChainObjectId,
+            options: { showContent: true }
+        });
+
+        if (onChainObj.data && (onChainObj.data.content as any).fields.active) {
+            setVerifyLogs(prev => [...prev, "✅ Step 2: Credential is ACTIVE on-chain.", "🎉 SUCCESS! VC is 100% Valid."]);
+            setVerifiedVC(fileData);
+            setVerifyStatus('success');
+        } else {
+            throw new Error("This credential has been REVOKED by the issuer on-chain.");
+        }
+
+      } catch (err: any) {
+        setVerifyLogs(prev => [...prev, `❌ ERROR: ${err.message}`]);
+        setVerifyStatus('error');
+      }
+    };
+    reader.readAsText(file);
+  };
+
 
   const resetFlow = (nextPanel: Panel) => {
     setPanel(nextPanel);
@@ -393,7 +481,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 30 : 100, // left-up logo conditional
+            height: isMobile ? 40 : 100, // left-up logo conditional
             opacity: 0.9 
           }} 
         />
@@ -451,7 +539,7 @@ export default function App() {
           </button>
         ))}
       </div>
-
+//========== Provider Panel ===//=== =======================================================
       <div style={cardStyle}>
         {panel === 'provider' && (
           <>
@@ -465,7 +553,7 @@ export default function App() {
             {statusMsg && <p style={{ color: THEME.accent, marginTop: '10px', fontSize: 14 }}>{statusMsg}</p>}
           </>
         )}
-
+//========== Professor Panel ===//=== =======================================================
         {panel === 'professor' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Professor Portal</h2>
@@ -544,8 +632,44 @@ export default function App() {
                 <button onClick={() => setStep(3)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', padding: 0 }}>← Back</button>
                 <input style={inputStyle} placeholder="Student Full Name" value={studentName} onChange={e => setStudentName(e.target.value)} />
                 <input style={inputStyle} placeholder="Student Passport / ID Number" value={passport} onChange={e => setPassport(e.target.value)} />
-                <textarea style={{ ...inputStyle, height: 100, fontFamily: 'sans-serif' }} placeholder="Recommendation content..." value={content} onChange={e => setContent(e.target.value)} />
-                <button disabled={loading} style={buttonStyle()} onClick={handleIssue}>{loading ? "Anchoring to IOTA..." : "Sign & Issue"}</button>
+                
+                <hr style={{ borderColor: '#333', margin: '15px 0' }} />
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '10px' }}>Write recommendation <b>OR</b> upload PDF:</p>
+
+                {/* content field*/}
+                <textarea 
+                  style={{ 
+                    ...inputStyle, 
+                    height: 100, 
+                    fontFamily: 'sans-serif',
+                    opacity: pdfFile ? 0.5 : 1 
+                  }} 
+                  placeholder="Recommendation content..." 
+                  value={content} 
+                  onChange={e => setContent(e.target.value)} 
+                  disabled={!!pdfFile} 
+                />
+
+                {/* file field*/}
+                <input 
+                  type="file" 
+                  accept=".pdf"
+                  style={{ 
+                    ...inputStyle, 
+                    background: 'rgba(255,255,255,0.05)',
+                    opacity: content ? 0.5 : 1 
+                  }}
+                  onChange={e => setPdfFile(e.target.files?.[0] || null)}
+                  disabled={content.length > 0} 
+                />
+
+                <button 
+                  disabled={loading || (!content && !pdfFile)} 
+                  style={buttonStyle()} 
+                  onClick={handleIssue}
+                >
+                  {loading ? "Anchoring to IOTA..." : "Sign & Issue"}
+                </button>
               </div>
             )}
 
@@ -590,7 +714,7 @@ export default function App() {
             )}
           </>
         )}
-
+//========== Student Panel ===//=== =======================================================
         {panel === 'student' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Student Vault</h2>
@@ -667,7 +791,7 @@ export default function App() {
                 </div>
                 <p style={{ color: '#eee', fontSize: 14, lineHeight: 1.5 }}>"{selectedRec.content}"</p>
                 
-                {/* --- FIXED: Added Reference ID display --- */}
+                {/* --- Added Reference ID display --- */}
                 <div style={{ marginTop: 12, borderTop: '1px solid #333', paddingTop: 12 }}>
                     <div style={{ marginBottom: 10 }}>
                         <p style={{fontSize: 11, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
@@ -689,7 +813,7 @@ export default function App() {
             )}
           </>
         )}
-
+//========== University Panel ===//=== =======================================================
         {panel === 'university' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
@@ -737,7 +861,7 @@ export default function App() {
                                 {loading ? "Fetching VC..." : "⬇️ Download Official VC (JSON)"}
                             </button>
 
-                           
+//========== Plain Text ===                      
                             <button 
                                 style={{ ...buttonStyle('#222'), marginTop: 0 }}
                                 onClick={() => {
@@ -769,7 +893,87 @@ export default function App() {
           </>
         )}
       </div>
+//========== Verifier Panel ===//=== ================================================
 
+        {panel === 'verifier' && (
+          <>
+            <h2 style={{ color: THEME.accent, marginTop: 0 }}>Standalone VC Verifier</h2>
+            <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>
+              Verify a TrustCycle JSON credential completely offline and client-side via IOTA cryptography.
+            </p>
+            
+            <div style={{
+              border: `2px dashed ${THEME.accent}`, 
+              borderRadius: '12px', 
+              padding: '30px', 
+              background: 'rgba(147, 51, 234, 0.05)',
+              position: 'relative',
+              cursor: 'pointer'
+            }}>
+              <input 
+                type="file" 
+                accept=".json" 
+                onChange={handleVerifyUploadedVC}
+                style={{
+                  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'
+                }}
+              />
+              <div style={{ fontSize: '40px', marginBottom: '10px' }}>📄</div>
+              <p style={{ margin: 0, fontWeight: 'bold', color: THEME.accent }}>Click or Drag JSON VC Here</p>
+            </div>
+
+            {/* Terminal Logs Window */}
+            {verifyLogs.length > 0 && (
+              <div style={{ 
+                marginTop: '20px', background: '#0a0a0a', border: '1px solid #333', 
+                borderRadius: '8px', padding: '15px', textAlign: 'left', fontFamily: 'monospace',
+                fontSize: '12px', color: '#00ff00', maxHeight: '150px', overflowY: 'auto'
+              }}>
+                {verifyLogs.map((log, i) => (
+                  <div key={i} style={{ color: log.includes('❌') ? '#ff4444' : log.includes('✅') ? '#00ff00' : '#aaa', marginBottom: 4 }}>
+                    {log}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Display Verified Data & Download PDF if it exists */}
+            {verifyStatus === 'success' && verifiedVC && (
+              <div style={{ marginTop: '20px', textAlign: 'left', background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px' }}>
+                <h3 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>Verified Subject Data</h3>
+                <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Student:</b> {verifiedVC.credential.credentialSubject.studentName}</p>
+                <p style={{ margin: '5px 0', fontSize: '13px' }}><b>Issuer:</b> {verifiedVC.credential.issuer}</p>
+                <hr style={{ borderColor: '#333', margin: '15px 0' }} />
+                
+                {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') ? (
+                  <button 
+                    style={buttonStyle('#4ade80')} 
+                    onClick={() => {
+                      // Extract base 64 from recomm
+                      const base64Data = verifiedVC.credential.credentialSubject.recommendationText.split('base64,')[1];
+                      const link = document.createElement("a");
+                      link.href = `data:application/pdf;base64,${base64Data}`;
+                      link.download = `Verified_Document_${verifiedVC.credential.credentialSubject.studentName}.pdf`;
+                      link.click();
+                    }}
+                  >
+                    ⬇️ Download Embedded PDF
+                  </button>
+                ) : (
+                  <div>
+                    <b style={{fontSize: '12px', color: '#888'}}>RECOMMENDATION TEXT:</b>
+                    <p style={{ fontSize: '14px', fontStyle: 'italic', background: '#000', padding: '10px', borderRadius: '8px' }}>
+                      "{verifiedVC.credential.credentialSubject.recommendationText}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+
+//========== Design ===//=== =======================================================
       <div style={{ 
           position: isMobile ? 'relative' : 'absolute',
           bottom: isMobile ? 'auto' : 20,

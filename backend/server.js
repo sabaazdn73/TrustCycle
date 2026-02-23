@@ -201,17 +201,28 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN)
+   6. ISSUE RECOMMENDATION (ON-CHAIN) - Supporting Text & PDF
 ===================================================== */
-app.post('/api/issue', async (req, res) => {
+
+const multer = require('multer');
+const storage = multer.memoryStorage(); // store temporary to convert Base64
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
-    const { authId, studentName, passport, content, issuerEmail, issuerName } = req.body;
-    if (!authId || !studentName || !passport || !content) return res.status(400).json({ error: "Missing required fields" });
+    let { authId, studentName, passport, content, issuerEmail, issuerName } = req.body;
 
-    const hackathonNote = "Demo version for MasterZ*IOTA Europe Hackathon 2026.";
-    const dateIssued = new Date().toUTCString();
-    const formattedContent = `\n${content}`;
+    let finalContent = content;
+    if (req.file) {
+      const base64Data = req.file.buffer.toString('base64');
+      finalContent = `file:${req.file.mimetype};base64,${base64Data}`;
+    }
 
+    if (!authId || !studentName || !passport || !finalContent) {
+      return res.status(400).json({ error: "Missing required fields (Name, Passport, and Recommendation Content/File)" });
+    }
+
+    const dateIssued = new Date().toISOString();
     /* ======================================================
        VC GENERATION + NATIVE Ed25519 SIGNING (Move-Compatible)
     ====================================================== */
@@ -244,7 +255,11 @@ app.post('/api/issue', async (req, res) => {
     };
 
     const vcString = JSON.stringify(signedVc);
-    const contentHash = sha256(vcString);
+    const contentHash = sha256(vcString); //Hasing entire VC for on-cain reference
+
+    /* ======================================================
+       IOTA TRANSACTION
+    ====================================================== */
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
@@ -279,7 +294,7 @@ app.post('/api/issue', async (req, res) => {
       studentName,
       encryptedPassport, 
       passportHash, 
-      content: formattedContent,  
+      content: finalContent,  
       contentHash,
       vc: signedVc,
       status: 'Verified',

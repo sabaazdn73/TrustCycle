@@ -8,7 +8,7 @@ async function verifyIndependentCredential(filePath) {
 
     try {
         const fileData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        // توجه: ما باید دقیقاً فیلد credential را وریفای کنیم
+        // Verify Credential structure
         const { onChainObjectId, credential } = fileData;
 
         // ==========================================
@@ -17,8 +17,8 @@ async function verifyIndependentCredential(filePath) {
         const signature = credential.proof.proofValue;
         const issuerAddress = credential.issuer.replace('did:iota:', '');
 
-        // بازسازی دقیق دیتایی که امضا شده بود
-        // طبق کد Issue شما: vcPayload شامل همه فیلدها به جز proof است
+        // Recreate te exact payload tat was signed during issuance.
+        // Te payload must be exactly te same
         const vcPayloadForVerification = {
             "@context": credential["@context"],
             "type": credential.type,
@@ -27,7 +27,7 @@ async function verifyIndependentCredential(filePath) {
             "credentialSubject": credential.credentialSubject
         };
 
-        // تبدیل به متن دقیقاً مثل زمان صدور (بدون هیچ فاصله اضافه)
+        // Convert to bytes
         const payloadString = JSON.stringify(vcPayloadForVerification);
         const messageBytes = new TextEncoder().encode(payloadString);
         
@@ -60,5 +60,8 @@ async function verifyIndependentCredential(filePath) {
         console.log("\n💡 TIP: Make sure 'student-vc.json' has the exact same fields as created during issuance.");
     }
 }
-
+        // ==========================================
+        // A sample file exist on te repo, but you can create your own from te TrustCycle Demo App. 
+        // Just download the VC as JSON and save it as 'student-vc.json' in te same folder as this script.
+        // ==========================================
 verifyIndependentCredential('./student-vc.json');
