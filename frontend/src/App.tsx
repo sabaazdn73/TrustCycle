@@ -485,7 +485,9 @@ export default function App() {
         ))}
       </div>
       <div style={cardStyle}>
-
+        {/* ======================================================
+            PANEL: PROVIDER
+        ====================================================== */}
         {panel === 'provider' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Provider Admin</h2>
@@ -498,7 +500,9 @@ export default function App() {
             {statusMsg && <p style={{ color: THEME.accent, marginTop: '10px', fontSize: 14 }}>{statusMsg}</p>}
           </>
         )}
-
+        {/* ======================================================
+            PROFESSOR PANEL
+        ====================================================== */}
         {panel === 'professor' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Professor Portal</h2>
@@ -660,15 +664,20 @@ export default function App() {
           </>
         )}
 
+        {/* ======================================================
+            PANEL: STUDENT VAULT
+        ====================================================== */}
         {panel === 'student' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Student Vault</h2>
+            
             {step === 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button style={buttonStyle()} onClick={() => setStep(2)}>🔍 Find My Records</button>
                 <button style={buttonStyle('#222')} onClick={() => setStep(4)}>🔗 Verify Reference Code</button>
               </div>
             )}
+
             {step === 2 && (
               <>
                 <button onClick={() => setStep(1)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', float: 'left' }}>← Back</button>
@@ -678,349 +687,153 @@ export default function App() {
                 <button disabled={loading} style={buttonStyle()} onClick={handleStudentSearch}>Search Blockchain</button>
               </>
             )}
+
             {step === 3 && (
               <div style={{ textAlign: 'left' }}>
-                <button onClick={() => setStep(1)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '10px', padding: 0 }}>← Back</button>
-                {searchRes.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>No records found for this identity.</p>}
+                <button onClick={() => setStep(2)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '10px', padding: 0 }}>← Back</button>
+                {searchRes.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>No records found.</p>}
                 {searchRes.map((r: any, idx) => (
-                  <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 8, marginBottom: 10, border: '1px solid #333' }}>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <span style={{fontSize: 12, color: '#888'}}>Ref: {r.id.substring(0,12)}...</span>
-                        <span style={{fontSize: 12}}>{r.status === 'Verified' ? '✅' : '❌'}</span>
+                  <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 10, marginBottom: 10, border: '1px solid #333' }}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <span style={{fontSize: 11, color: THEME.accent, fontFamily: 'monospace'}}>
+                          ID: {r.id.slice(0, 6)}...{r.id.slice(-4)}
+                        </span>
+                        <span>{r.status === 'Verified' ? '✅' : '❌'}</span>
                     </div>
-                    <div style={{marginTop: 8, fontSize: 14}}>{r.content}</div>
-                    
-                    {/* ---  tabs --- */}
+                    <div style={{marginTop: 8, fontSize: 13, color: '#ccc'}}>
+                      {r.content.startsWith('file:') ? "📄 PDF Document" : r.content.substring(0, 50) + "..."}
+                    </div>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                      <button 
-                        style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, padding: 0, cursor: 'pointer', fontWeight: 'bold' }} 
-                        onClick={() => handleVerifyId(r.id)}
-                      >
-                        View Details
-                      </button>
-
-                      <button 
-                        style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, padding: 0, cursor: 'pointer', fontWeight: 'bold' }} 
-                        onClick={() => handleDownloadJSON(r.id)}
-                      >
-                        ⬇️ Download VC (JSON)
-                      </button>
+                      <button style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleVerifyId(r.id)}>View Details</button>
+                      <button style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDownloadJSON(r.id)}>Download VC</button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+
             {step === 4 && (
               <>
                 <button onClick={() => setStep(1)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', float: 'left' }}>← Back</button>
                 <div style={{clear: 'both'}}></div>
-                <input 
-                  style={inputStyle} 
-                  placeholder="Paste Reference Code Here" 
-                  value={studentRefInput}
-                  onChange={(e) => setStudentRefInput(e.target.value)}
-                />
-                <button 
-                  style={buttonStyle()} 
-                  onClick={() => handleVerifyId(studentRefInput)}
-                >
-                  Fetch Data
-                </button>
+                <input style={inputStyle} placeholder="Paste Reference Code" value={studentRefInput} onChange={(e) => setStudentRefInput(e.target.value)} />
+                <button style={buttonStyle()} onClick={() => handleVerifyId(studentRefInput)}>Fetch Data</button>
               </>
             )}
+
             {selectedRec && (
               <div style={{ marginTop: 16, background: '#000', padding: 16, borderRadius: 12, border: '1px solid #333', textAlign: 'left' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                     <span style={{ fontSize: 11, color: '#666' }}>STATUS</span>
                     <span style={{ color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444', fontWeight: 'bold', fontSize: 12 }}>{selectedRec.status.toUpperCase()}</span>
                 </div>
-                <p style={{ color: '#eee', fontSize: 14, lineHeight: 1.5 }}>"{selectedRec.content}"</p>
                 
-                {/* --- Added Reference ID display --- */}
-                <div style={{ marginTop: 12, borderTop: '1px solid #333', paddingTop: 12 }}>
-                    <div style={{ marginBottom: 10 }}>
-                        <p style={{fontSize: 11, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
-                        <code style={{fontSize: 12, color: THEME.accent, wordBreak: 'break-all', display: 'block', maxHeight: '150px', overflowY: 'auto'}}>{selectedRec.id}</code>
+                <div style={{ color: '#eee', fontSize: 14, lineHeight: 1.5, marginBottom: 15 }}>
+                  {selectedRec.content.startsWith('file:') 
+                    ? <div style={{color: THEME.accent}}>📄 PDF Recommendation Attached</div> 
+                    : `"${selectedRec.content}"`
+                  }
+                </div>
+                
+                <div style={{ borderTop: '1px solid #222', paddingTop: 12 }}>
+                    <p style={{fontSize: 10, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <code style={{fontSize: 12, color: THEME.accent}}>
+                        {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
+                      </code>
+                      <button 
+                        onClick={() => {navigator.clipboard.writeText(selectedRec.id); alert('Copied!');}}
+                        style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
+                      >Copy</button>
                     </div>
-
-                    <div>
-                        <p style={{fontSize: 11, color: '#666', margin: 0}}>ISSUER</p>
-                        <p style={{fontSize: 12, color: '#aaa', margin: 0}}>{selectedRec.issuerEmail}</p>
-                    </div>
-                    <button 
-                        style={{ ...buttonStyle(), marginTop: 12 }} 
-                        onClick={() => handleDownloadJSON(selectedRec.id)}
-                    >
-                        ⬇️ Download Official VC (JSON)
-                    </button>
+                    <button style={buttonStyle()} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download VC (JSON)</button>
                 </div>
               </div>
             )}
           </>
         )}
 
+        {/* ======================================================
+            PANEL: UNIVERSITY CHECK
+        ====================================================== */}
         {panel === 'university' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
-            <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>Verify the authenticity of an applicant's recommendation.</p>
-            <input 
-              style={inputStyle} 
-              placeholder="Enter Recommendation Reference Hash" 
-              value={uniRefInput}
-              onChange={(e) => setUniRefInput(e.target.value)}
-            />
-            <button 
-              disabled={loading} 
-              style={buttonStyle()} 
-              onClick={() => handleVerifyId(uniRefInput)}
-            >
-              Verify Authenticity
-            </button>
+            <p style={{fontSize: 13, color: '#888', marginBottom: 20}}>Verify applicant authenticity via IOTA.</p>
+            <input style={inputStyle} placeholder="Enter Hash Code" value={uniRefInput} onChange={(e) => setUniRefInput(e.target.value)} />
+            <button disabled={loading} style={buttonStyle()} onClick={() => handleVerifyId(uniRefInput)}>Verify Authenticity</button>
+            
             {selectedRec && (
-              <div style={{ marginTop: 24, padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+              <div style={{ marginTop: 24, padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid #333' }}>
                 <div style={{fontSize: 40, marginBottom: 10}}>{selectedRec.status === 'Verified' ? '🛡️' : '⚠️'}</div>
                 <h3 style={{ margin: 0, color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444' }}>
-                  {selectedRec.status === 'Verified' ? 'Authentic Document' : 'Invalid or Revoked'}
+                  {selectedRec.status === 'Verified' ? 'Authentic Document' : 'Invalid'}
                 </h3>
-                <p style={{ fontSize: 13, color: '#888' }}>
-                    Timestamp: {new Date(selectedRec.timestamp).toLocaleString()}
-                </p>
-
+                
                 {selectedRec.status === 'Verified' && (
-                    <div style={{ marginTop: 20, borderTop: '1px solid #333', paddingTop: 20 }}>
-                        <div style={{ textAlign: 'left', background: '#000', padding: 15, borderRadius: 8, marginBottom: 15 }}>
-                            <p style={{ fontSize: 11, color: '#666', margin: '0 0 8px 0', fontWeight: 'bold' }}>RECOMMENDATION TEXT</p>
-                            <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.5, margin: 0 }}>"{selectedRec.content}"</p>
-                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#aaa' , wordBreak: 'break-all', maxHeight: '150px', overflowY: 'auto'}}>
-                                <span>Student: {selectedRec.studentName}</span>
-                                <span>Passport: {selectedRec.passport}</span>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <button 
-                                disabled={loading}
-                                style={buttonStyle(THEME.accent)}
-                                onClick={() => handleDownloadJSON(selectedRec.id)}
-                            >
-                                {loading ? "Fetching VC..." : "⬇️ Download Official VC (JSON)"}
-                            </button>
-
-               
-                            <button 
-                                style={{ ...buttonStyle('#222'), marginTop: 0 }}
-                                onClick={() => {
-                                    const txt = `TRUSTCYCLE VERIFIED - Demo Version, Built for the First European Web3 Hackathon by MasterZ*IOTA (2026).
-                                    Student: ${selectedRec.studentName}
-                                    Passport: ${selectedRec.passport}
-                                    Date: ${new Date(selectedRec.timestamp).toLocaleString()}
-                                    Recommendation:
-                                    "${selectedRec.content}"
-                                    Professor Name: ${selectedRec.issuerName || 'Verified Academic'}
-                                    Issuer Email: ${selectedRec.issuerEmail}
-                                    Signature: ${selectedRec.id}`;
-                                    const blob = new Blob([txt], { type: 'text/plain' });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `Rec_${selectedRec.studentName}.txt`;
-                                    a.click();
-                                    URL.revokeObjectURL(url);
-                                }}
-                            >
-                                📄 Save as Plain Text
-                            </button>
+                  <div style={{ marginTop: 20, textAlign: 'left' }}>
+                    <div style={{ background: '#000', padding: 15, borderRadius: 8, marginBottom: 15 }}>
+                        <p style={{ fontSize: 10, color: THEME.accent, fontWeight: 'bold', marginBottom: 8 }}>CONTENT</p>
+                        <p style={{ color: '#fff', fontSize: 13, margin: 0 }}>
+                          {selectedRec.content.startsWith('file:') ? "📄 Secure PDF Attachment" : selectedRec.content}
+                        </p>
+                        <div style={{ marginTop: 12, fontSize: 11, color: '#666' }}>
+                          Student: {selectedRec.studentName} | ID: {selectedRec.passport.slice(0,4)}***
                         </div>
                     </div>
+                    <button style={buttonStyle()} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download Official VC</button>
+                  </div>
                 )}
               </div>
             )}
           </>
         )}
-      
+
+        {/* ======================================================
+            PANEL: VERIFIER (STAY CONSISTENT)
+        ====================================================== */}
         {panel === 'verifier' && (
           <>
-          <h2 style={{ color: THEME.accent, marginTop: 0, letterSpacing: '1px' }}>
-            🛡️ Standalone VC Verifier
-            </h2>
-            <p style={{ fontSize: 13, color: '#aaa', marginBottom: 20, lineHeight: '1.6' }}>
-              Verify a TrustCycle JSON credential completely offline and client-side via IOTA cryptography.
-              </p>
-              <div style={{
-                border: `2px dashed ${THEME.accent}66`, 
-                borderRadius: '16px', 
-                padding: '40px 20px', 
-                background: 'rgba(147, 51, 234, 0.03)',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}>
-                  <input 
-                  type="file" 
-                  accept=".json" 
-                  onChange={handleVerifyUploadedVC}
-                  style={{
-                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer'
-                  }}
-                />
-                <div style={{ fontSize: '45px', marginBottom: '15px', filter: 'drop-shadow(0 0 10px #9333ea66)' }}>🔮</div>
-                <p style={{ margin: 0, fontWeight: 'bold', color: '#e9d5ff', letterSpacing: '0.5px' }}>
-                  Drop JSON Credential Here
-                </p>
-                <p style={{ fontSize: '11px', color: '#666', marginTop: '5px' }}>Click to browse your files</p>
-              </div>
-              {/* Terminal Logs Window -*/}
-              {verifyLogs.length > 0 && (
-                <div style={{ 
-                  marginTop: '25px', background: '#080808', border: '1px solid #222', 
-                  borderRadius: '12px', padding: '15px', textAlign: 'left', fontFamily: 'monospace',
-                  fontSize: '12px', color: '#d8b4fe', maxHeight: '180px', overflowY: 'auto',
-                  boxShadow: 'inset 0 0 20px #000'
-              }}>
-                {verifyLogs.map((log, i) => (
-                  <div key={i} style={{ 
-                    color: log.includes('❌') ? '#ff6b6b' : log.includes('✅') ? '#c084fc' : '#777', 
-                    marginBottom: 6,
-                    display: 'flex',
-                    gap: '8px'
-                }}>
-                  <span style={{ color: '#444' }}>[{new Date().toLocaleTimeString([], {hour12: false})}]</span>
-                  {log}
-                </div>
-             ))}
-          </div>
-        )}
-        
-        {/* Display Verified Data - */}
-        {verifyStatus === 'success' && verifiedVC && (
-          <div style={{ 
-            marginTop: '25px', textAlign: 'left', background: 'linear-gradient(145deg, rgba(147,51,234,0.1), rgba(0,0,0,0.4))', 
-            padding: '20px', borderRadius: '16px', border: '1px solid #9333ea33' 
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ color: '#fff', margin: 0, fontSize: '16px' }}>✨ Verified Subject Data</h3>
-            <span style={{ background: '#22c55e', color: '#fff', fontSize: '10px', padding: '2px 8px', borderRadius: '100px', fontWeight: 'bold' }}>AUTHENTIC</span>
+            <h2 style={{ color: THEME.accent, marginTop: 0 }}>🛡️ Standalone Verifier</h2>
+            <div style={{ border: `2px dashed ${THEME.accent}44`, borderRadius: 16, padding: 30, background: 'rgba(147,51,234,0.03)', position: 'relative' }}>
+              <input type="file" accept=".json" onChange={handleVerifyUploadedVC} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
+              <div style={{ fontSize: 40, marginBottom: 10 }}>🔮</div>
+              <p style={{ fontWeight: 'bold', color: '#e9d5ff', margin: 0 }}>Drop VC JSON Here</p>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <p style={{ margin: 0, fontSize: '13px', color: '#bbb' }}>
-                <b style={{ color: '#ddd' }}>Student:</b> {verifiedVC.credential.credentialSubject.studentName}
-              </p>
-              <p style={{ margin: 0, fontSize: '11px', color: '#666', wordBreak: 'break-all' }}>
-                <b style={{ color: '#888' }}>Issuer DID:</b> {verifiedVC.credential.issuer}
-              </p>
+            {verifyLogs.length > 0 && (
+              <div style={{ marginTop: 20, background: '#080808', padding: 12, borderRadius: 10, textAlign: 'left', fontFamily: 'monospace', fontSize: 11, color: '#d8b4fe', maxHeight: 120, overflowY: 'auto' }}>
+                {verifyLogs.map((log, i) => <div key={i} style={{ marginBottom: 4 }}>{log}</div>)}
               </div>
-              
-              <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '15px 0' }} />
-              {verifiedVC.credential.credentialSubject.recommendationText.startsWith('file:') ? (
-                <button 
-                  style={buttonStyle(THEME.accent)} 
-                  onClick={() => {
-                    const base64Data = verifiedVC.credential.credentialSubject.recommendationText.split('base64,')[1];
-                    const link = document.createElement("a");
-                    link.href = `data:application/pdf;base64,${base64Data}`;
-                    link.download = `Verified_Document_${verifiedVC.credential.credentialSubject.studentName}.pdf`;
-                    link.click();
-                  }}
-                >
-                  📥 Download Verified PDF
-                </button>
-             ) : (
-             <div>
-              <b style={{fontSize: '11px', color: '#9333ea', letterSpacing: '1px'}}>DECRYPTED CONTENT</b>
-              <p style={{ 
-                fontSize: '13px', color: '#eee', background: 'rgba(0,0,0,0.5)', 
-                padding: '12px', borderRadius: '10px', marginTop: '8px', 
-                borderLeft: `3px solid ${THEME.accent}`, fontStyle: 'italic' 
-              }}>
-                "{verifiedVC.credential.credentialSubject.recommendationText}"
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  )}
-      </div>
-      
-      <div style={{ 
-          position: isMobile ? 'relative' : 'absolute',
-          bottom: isMobile ? 'auto' : 20,
-          right: isMobile ? 'auto' : 30,
-          marginTop: isMobile ? '40px' : 0,
-          paddingBottom: isMobile ? '20px' : 0,
-          width: isMobile ? '100%' : 'auto',
-          zIndex: 30, 
-          textAlign: 'center'
-      }}>
-        <p style={{ 
-            fontSize: '11px', 
-            color: '#817d7de9', 
-            margin: 0, 
-            fontFamily: 'monospace',
-            letterSpacing: '0.5px',
-            cursor: 'default',
-        }}>
-          Crafted by{' '}
-          <a
-            href="https://www.linkedin.com/in/saba-azadegan-2974b622a/"
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              fontWeight: 'bold',
-              color: '#8c8a8ac7',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              borderBottom: '1px dotted #7e7d7d'
-            }}
-          >
-            Saba Azadegan
-          </a>
-          {' '}for {' '}
-          <a
-            href="https://blog.iota.org/masterz-hackathon/"
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              fontWeight: 'bold',
-              color: '#8c8a8ac7',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              borderBottom: '1px dotted #7e7d7d'
-            }}
-          >
-            MasterZ*IOTA Hackathon
-          </a>
-        </p>
+            )}
 
-        <p style={{ 
-            fontSize: '11px', 
-            color: '#817d7de9', 
-            margin: '6px 0 0 0', 
-            fontFamily: 'monospace',
-            letterSpacing: '0.5px',
-        }}>
-          <a
-            href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing"
-            target="_blank" 
-            style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}
-          >
-            How it Works
-          </a>
+            {verifyStatus === 'success' && verifiedVC && (
+              <div style={{ marginTop: 20, padding: 15, background: 'rgba(74, 222, 128, 0.1)', borderRadius: 10, border: '1px solid #4ade8044', textAlign: 'left' }}>
+                <h4 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>✨ Verified Successfully</h4>
+                <p style={{ fontSize: 12, margin: 0 }}><b>Student:</b> {verifiedVC.credential.credentialSubject.studentName}</p>
+              </div>
+            )}
+          </>
+        )}
+      </div> {/* END OF CARD */}
+
+      {/* ======================================================
+          FOOTER SECTION
+      ====================================================== */}
+      <div style={{ 
+          position: isMobile ? 'relative' : 'absolute', bottom: isMobile ? 'auto' : 20, right: isMobile ? 'auto' : 30,
+          marginTop: isMobile ? '40px' : 0, paddingBottom: isMobile ? '20px' : 0, zIndex: 30, textAlign: isMobile ? 'center' : 'right'
+      }}>
+        <p style={{ fontSize: '11px', color: '#817d7de9', margin: 0, fontFamily: 'monospace' }}>
+          Crafted by <a href="https://www.linkedin.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Saba Azadegan</a> for MasterZ*IOTA
+        </p>
+        <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace' }}>
+          <a href="https://drive.google.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Docs</a>
           {' . '}
-          <a
-            href="https://github.com/sabaazdn73/TrustCycle-DRS"
-            target="_blank" 
-            style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}
-          >
-            GitHub
-          </a>
+          <a href="https://github.com/..." target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
           {' . '}
           <TechnicalAssistant />
         </p>
       </div>
     </div>
-  );
-}
+  );}
