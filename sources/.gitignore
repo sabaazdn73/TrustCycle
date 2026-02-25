@@ -4,6 +4,7 @@ node_modules/
 # Environment Variables (Secrets)
 .env
 .env.*
+*.key
 
 # Mac System Files
 .DS_Store
@@ -13,6 +14,5 @@ dist/
 build/
 
 # Move/IOTA Build Files (Important)
-.move/
 build/
 *.lock
