@@ -99,7 +99,7 @@ export default function TechnicalAssistant() {
               style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '18px' }}
             >✕</button>
             
-            <h3 style={{ color: '#9333ea', marginTop: 0 }}>🤖 Technical Assistant</h3>
+            <h3 style={{ color: '#9333ea', marginTop: 0 }}>🤖 TrustCycle Architecture Assistant</h3>
             <p style={{ fontSize: '13px', color: '#888', marginBottom: '20px' }}>Ask me about the architecture, security, or W3C standards used in this project.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
