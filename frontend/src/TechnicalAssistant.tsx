@@ -79,7 +79,7 @@ export default function TechnicalAssistant() {
           marginLeft: '8px' 
         }}
       >
-        AI Assistant
+      Architecture Assistant
       </span>
 
       {isOpen && (
