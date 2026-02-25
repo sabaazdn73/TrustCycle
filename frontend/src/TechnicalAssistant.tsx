@@ -1,26 +1,42 @@
 import { useState, useEffect } from 'react';
 
-// 1. We added project-specific questions and answers here
+// 1. Project-specific questions and answers here
 const QA_DATA = [
-  { 
-    question: "What exactly does this platform do?", 
-    answer: "This platform is a decentralized verification graph. It bridges Web2 institutional identities (like Universities or Evaluators) with Web3 infrastructures. It allows authorized issuers to create tamper-proof 'Verifiable Credentials' (VCs) for students or beneficiaries." 
+  {
+    question: "What problem does TrustCycle actually solve?",
+    answer: "TrustCycle eliminates the '300-letter bottleneck' in academic admissions. Instead of professors repeatedly emailing recommendation letters to multiple universities, each recommendation is issued once as a unique on-chain Move object. Universities verify authenticity directly from the IOTA ledger using a reference ID—no manual email validation required."
   },
-  { 
-    question: "How does the blockchain secure my data?", 
-    answer: "We use the IOTA network and the Move programming language. When a credential is issued, a cryptographic hash of the content is stored on-chain. Move's resource-oriented architecture ensures that credentials behave like unique physical assets—they cannot be duplicated, forged, or altered." 
+  {
+    question: "Is this fully decentralized or partially custodial?",
+    answer: "TrustCycle is intentionally designed as Web2.5. Professors do not need crypto wallets. The backend signs transactions custodially to reduce adoption friction. However, the final credential state is anchored on-chain, making verification independent of our database."
   },
-  { 
-    question: "Is my personal data (like my passport) visible on the blockchain?", 
-    answer: "No. The system uses a privacy-preserving architecture. Your sensitive data is encrypted using AES-256 before being stored in our off-chain database. Only cryptographic hashes and Decentralized Identifiers (DIDs) are published on the IOTA ledger, ensuring full W3C compliance and GDPR privacy." 
+  {
+    question: "What exactly is stored on the blockchain?",
+    answer: "Only cryptographic hashes and structural metadata are stored on-chain. Specifically: the content hash, the subject reference hash, the issuer authorization ID, and the issuance timestamp. No raw personal data is published."
   },
-  { 
-    question: "Who pays the blockchain transaction fees?", 
-    answer: "Thanks to IOTA's underlying DAG (Directed Acyclic Graph) architecture, the network operates with highly optimized, near-zero fees compared to traditional blockchains like Ethereum. This makes high-volume academic or impact credentialing economically viable." 
+  {
+    question: "How does Move prevent forgery or duplication?",
+    answer: "Each recommendation is modeled as a Move resource with `has key, store`. Move's resource-oriented type system prevents duplication at the language level. The object capability model ensures that only the authorized issuer can revoke or modify credential state."
   },
-  { 
-    question: "What happens if a credential needs to be revoked?", 
-    answer: "The authorized issuer (e.g., the Professor) can call the 'revoke_recommendation' function on the Move smart contract. This updates the on-chain status to inactive. Anyone verifying the W3C credential later will instantly see that it has been revoked." 
+  {
+    question: "How does revocation work?",
+    answer: "Revocation is performed by calling `revoke_recommendation` in the Move contract. The credential's `active` field is set to false on-chain. During verification, the system cross-checks blockchain state to ensure the credential has not been revoked."
+  },
+  {
+    question: "How is student privacy preserved?",
+    answer: "Student passport data is encrypted using AES-256 before storage in the backend database. On-chain, only a SHA-256 hash of the passport is stored. This ensures GDPR-aligned privacy while maintaining cryptographic verifiability."
+  },
+  {
+    question: "What happens if your database is compromised?",
+    answer: "The database is not the source of truth. During verification, the system queries the IOTA ledger to validate the credential's active status. Any inconsistency between database records and on-chain state invalidates the credential."
+  },
+  {
+    question: "How does this align with W3C Verifiable Credentials?",
+    answer: "TrustCycle exports credentials as JSON-LD documents compliant with the W3C Verifiable Credentials standard. The proof section anchors verification to an IOTA transaction digest, enabling interoperability beyond the TrustCycle interface."
+  },
+  {
+    question: "Why use IOTA instead of Ethereum?",
+    answer: "IOTA's architecture enables efficient object-based state management and scalable execution. For high-volume academic credentialing, the network's optimized structure allows cost-efficient anchoring compared to traditional gas-heavy systems."
   }
 ];
 
