@@ -875,7 +875,7 @@ export default function App() {
           <a href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Docs</a>
           {' . '}
           <a href="https://github.com/sabaazdn73/TrustCycle-DRS" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
-          {' . '}
+          {' .'}
           <TechnicalAssistant />
         </p>
       </div>
