@@ -3,6 +3,7 @@ node_modules/
 
 # Environment Variables (Secrets)
 .env
+.key
 
 # Mac System Files
 .DS_Store
