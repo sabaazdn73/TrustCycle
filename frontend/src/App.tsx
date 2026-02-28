@@ -475,6 +475,7 @@ export default function App() {
         </p>
       </div>
 
+
       <div style={{ 
         display: 'flex', 
         gap: '10px', 
@@ -482,8 +483,10 @@ export default function App() {
         zIndex: 10, 
         marginRight: isMobile ? '0' : '35%',
         flexWrap: 'wrap',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        alignItems: 'center'
       }}>
+        {/* bottoms*/}
         {(['professor', 'student', 'university', 'verifier', 'provider'] as Panel[]).map(p => (
           <button 
             key={p} 
@@ -492,18 +495,62 @@ export default function App() {
                 background: panel === p ? THEME.accent : 'rgba(255,255,255,0.03)', 
                 color: panel === p ? '#fff' : '#888',
                 border: `1px solid ${panel === p ? THEME.accent : '#333'}`, 
-                padding: '8px 16px', 
+                padding: '0 16px', 
+                height: '36px',
+                display: 'inline-flex',
                 borderRadius: '100px', 
                 cursor: 'pointer',
                 fontSize: '0.8rem',
                 fontWeight: 600,
+                alignItems: 'center',
+                gap: '6px',
                 transition: 'all 0.3s ease'
             }}
           >
             {p.toUpperCase()}
           </button>
         ))}
+
+        {/* paper */}
+        <a 
+          href="/TrustCycle_Litepaper.pdf" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            marginLeft: isMobile ? '0' : 'auto', 
+            background: 'rgba(147, 51, 234, 0.1)', 
+            border: `1px solid ${THEME.accent}`, 
+            color: '#d8b4fe',
+            padding: '0 16px',
+            height: '36px',
+            boxSizing: 'border-box',
+            borderRadius: '100px', 
+            textDecoration: 'none',
+            fontSize: '0.8rem',    
+            fontWeight: 600,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer',
+            boxShadow: '0 0 10px rgba(147, 51, 234, 0.2)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(147, 51, 234, 0.3)';
+            e.currentTarget.style.color = '#fff';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)';
+            e.currentTarget.style.color = '#d8b4fe';
+          }}
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          LITEPAPER
+        </a>
       </div>
+      
       <div style={cardStyle}>
         {/* ======================================================
             PANEL: PROVIDER
