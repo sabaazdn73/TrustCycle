@@ -137,17 +137,10 @@ A live testnet deployment is available. The standalone verifier panel allows ful
 
 ---
 
-## Academic Context
-
-TrustCycle is the technical prototype for ongoing master's thesis research on decentralized identity and verification architectures for institutional trust. The theoretical framework — the **Digital Identity and Verification Graph (DIVG)** — extends this credentialing logic to impact investing verification, proposing a game-theoretic, stakeholder-driven consensus mechanism for trustworthy impact claims.
-
----
-
 ## Author
 
 **Saba Azadegan**  
-MSc Business, Católica Lisbon School of Business and Economics  
-Supervised by Prof. António Miguel  
+MSc Business, Católica Lisbon School of Business and Economics   
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square)](https://www.linkedin.com/in/saba-azadegan-2974b622a)
 [![GitHub](https://img.shields.io/badge/GitHub-Profile-black?style=flat-square)](https://github.com/sabaazdn73)
