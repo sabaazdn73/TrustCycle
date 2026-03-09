@@ -131,7 +131,7 @@ A live testnet deployment is available. The standalone verifier panel allows ful
 ## On-Chain Deployment
 
 - **Network:** IOTA Rebased Testnet  
-- **Package ID:** *(see `/sources/README.md`)*  
+- **Package ID:** *(see `/backend/README.md`)*  
 - **Explorer:** [explorer.rebased.iota.org](https://explorer.rebased.iota.org)
 
 ---
