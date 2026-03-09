@@ -5,7 +5,6 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square)](https://trust-cycle-drs.vercel.app)
 [![Network](https://img.shields.io/badge/Network-IOTA%20Testnet-blue?style=flat-square)](https://explorer.rebased.iota.org)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ---
 
