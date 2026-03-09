@@ -93,8 +93,8 @@ MONGO_URI=                  # MongoDB Atlas connection string
 
 # IOTA Blockchain
 IOTA_NODE_URL=              # IOTA node URL (defaults to testnet fullnode)
-PACKAGE_ID=                 # 0xcf3e0c00bd0829229c74af6aa5f127260d2d3ac8ce0d8df45b923c0dd8453199
-PROTOCOL_CONFIG_ID=         # 0x785ddbfe3d5586034d687a65e0d6329220032ff957c861b5ef96cb2ef3ad495e
+PACKAGE_ID=0xcf3e0c00bd0829229c74af6aa5f127260d2d3ac8ce0d8df45b923c0dd8453199
+PROTOCOL_CONFIG_ID=0x785ddbfe3d5586034d687a65e0d6329220032ff957c861b5ef96cb2ef3ad495e
 ISSUER_MNEMONIC=            # BIP39 mnemonic for the admin keypair (custodial signer)
 
 # Encryption
@@ -109,6 +109,8 @@ SERP_API_KEY=               # SerpAPI key for Google Knowledge Graph lookups
 
 # Administration
 ADMIN_ACCESS_KEY=           # Secret key for /api/admin/whitelist endpoint
+PORT=3001
+NODE_ENV=development
 ```
 
 > ⚠️ Never commit `.env` to version control. All secrets are excluded via `.gitignore`.
@@ -120,7 +122,6 @@ ADMIN_ACCESS_KEY=           # Secret key for /api/admin/whitelist endpoint
 ```bash
 cd backend
 npm install
-cp .env.example .env   # Fill in your values
 node server.js
 ```
 
