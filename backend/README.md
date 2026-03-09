@@ -93,8 +93,8 @@ MONGO_URI=                  # MongoDB Atlas connection string
 
 # IOTA Blockchain
 IOTA_NODE_URL=              # IOTA node URL (defaults to testnet fullnode)
-PACKAGE_ID=                 # Deployed Move package ID
-PROTOCOL_CONFIG_ID=         # Shared ProtocolConfig object ID
+PACKAGE_ID=                 # 0xcf3e0c00bd0829229c74af6aa5f127260d2d3ac8ce0d8df45b923c0dd8453199
+PROTOCOL_CONFIG_ID=         # 0x785ddbfe3d5586034d687a65e0d6329220032ff957c861b5ef96cb2ef3ad495e
 ISSUER_MNEMONIC=            # BIP39 mnemonic for the admin keypair (custodial signer)
 
 # Encryption
