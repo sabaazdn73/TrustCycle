@@ -526,7 +526,7 @@ export default function App() {
             target="_blank" 
             rel="noopener noreferrer"
             style={{
-              background: 'rgba(147, 51, 234, 0.1)',
+              background: 'rgba(147, 51, 234, 0.1)', 
               border: `1px solid ${THEME.accent}`, 
               color: '#d8b4fe',
               padding: '0 16px',
