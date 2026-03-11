@@ -181,17 +181,23 @@ tr:nth-child(even) td{background:#f9f9f7;}
 .footer{border-top:1px solid var(--border);padding:24px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#9ca3af;font-family:'JetBrains Mono',monospace;}
 
 code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f3f4f6;padding:2px 6px;border-radius:3px;color:#374151;}
-  /* =========================================
-   📱 MOBILE RESPONSIVE FIXES 
+/* =========================================
+   📱 MOBILE RESPONSIVE FIXES
    ========================================= */
 @media (max-width: 768px) {
-  body { overflow-x: hidden; }
+  html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; }
+  
+
+  code, p, .value { word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+  code { white-space: pre-wrap; display: inline-block; max-width: 100%; word-break: break-all; }
   
   
-  .cover { padding: 50px 24px 40px; }
-  .cover h1 { font-size: 42px; }
-  .cover-meta { flex-direction: column; gap: 20px; }
-  .page { padding: 40px 20px; }
+  .cover { padding: 40px 20px 30px; }
+  .cover h1 { font-size: 13vw; line-height: 1.1; } 
+  .cover-tagline { font-size: 16px; }
+  .cover-meta { flex-direction: column; gap: 16px; }
+  
+  .page { padding: 30px 16px; overflow-x: hidden; }
   
   
   .walletless-grid, 
@@ -209,9 +215,9 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f3f4f6;pa
   .sso-arrow { transform: rotate(90deg); padding: 12px 0; text-align: center; }
   
   
-  table { display: block; overflow-x: auto; white-space: nowrap; border-radius: 8px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; border-radius: 8px; width: 100%; }
   
- 
+  
   .arch-row { flex-direction: column; text-align: center; }
   .arch-flow { width: 100%; margin: 10px 0; }
   .arch-actor { width: 100%; }
