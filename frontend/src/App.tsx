@@ -514,42 +514,44 @@ export default function App() {
         {/* 🚀 Action Buttons Container */}
         <div style={{ 
           display: 'flex', 
-          gap: '12px', 
+          flexDirection: 'column', 
+          gap: '10px', 
           marginLeft: isMobile ? '0' : 'auto',
-          alignItems: 'center',
-          flexWrap: 'wrap' // mobile-friendly
+          alignItems: isMobile ? 'center' : 'flex-end' 
         }}>
           
-          {/* 1. Final Report / Project Overview (Primary Button) */}
+          {/* 1. Final Report / Project Overview (Top Button) */}
           <a 
             href="/final-report.html" 
             target="_blank" 
             rel="noopener noreferrer"
             style={{
-              background: 'rgba(147, 51, 234, 0.9)', 
+              background: 'rgba(147, 51, 234, 0.1)',
               border: `1px solid ${THEME.accent}`, 
-              color: '#ffffff',
-              padding: '0 20px',
+              color: '#d8b4fe',
+              padding: '0 16px',
               height: '36px',
               boxSizing: 'border-box',
               borderRadius: '100px', 
               textDecoration: 'none',
               fontSize: '0.8rem',    
-              fontWeight: 700,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '150px', 
               gap: '6px',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
-              boxShadow: '0 0 15px rgba(147, 51, 234, 0.4)'
+              boxShadow: '0 0 10px rgba(147, 51, 234, 0.2)'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 1)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.3)';
+              e.currentTarget.style.color = '#fff';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.9)';
-              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)';
+              e.currentTarget.style.color = '#d8b4fe';
             }}
           >
             <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
@@ -558,7 +560,7 @@ export default function App() {
             FINAL REPORT
           </a>
 
-          {/* 2. Litepaper (Secondary Button) */}
+          {/* 2. Litepaper (Bottom Button) */}
           <a 
             href="/TrustCycle_Litepaper.pdf" 
             target="_blank" 
@@ -576,6 +578,8 @@ export default function App() {
               fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '150px', 
               gap: '6px',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
