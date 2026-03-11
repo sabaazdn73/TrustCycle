@@ -515,7 +515,7 @@ export default function App() {
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: '8px', // فاصله کمتر شد
+          gap: '8px', 
           marginLeft: isMobile ? '0' : 'auto',
           alignItems: isMobile ? 'center' : 'flex-end',
           marginTop: isMobile ? '12px' : '0'
@@ -528,47 +528,8 @@ export default function App() {
             rel="noopener noreferrer"
             style={{
               background: 'rgba(147, 51, 234, 0.08)', 
-              border: `1px solid ${THEME.accent}`, 
-              color: '#d8b4fe',
-              padding: '0 12px',
-              height: '30px', 
-              boxSizing: 'border-box',
-              borderRadius: '100px', 
-              textDecoration: 'none',
-              fontSize: '0.75rem', 
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '135px', 
-              gap: '6px',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.2)';
-              e.currentTarget.style.color = '#fff';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.08)';
-              e.currentTarget.style.color = '#d8b4fe';
-            }}
-          >
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
-            </svg>
-            FINAL REPORT
-          </a>
-
-          {/* 2. Litepaper (Bottom Button) */}
-          <a 
-            href="/TrustCycle_Litepaper.pdf" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              background: 'rgba(147, 51, 234, 0.05)', 
               border: `1px solid rgba(147, 51, 234, 0.5)`, 
-              color: '#c084fc',
+              color: '#d8b4fe',
               padding: '0 12px',
               height: '30px',
               boxSizing: 'border-box',
@@ -590,8 +551,49 @@ export default function App() {
               e.currentTarget.style.border = `1px solid ${THEME.accent}`;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.05)';
-              e.currentTarget.style.color = '#c084fc';
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.08)';
+              e.currentTarget.style.color = '#d8b4fe';
+              e.currentTarget.style.border = `1px solid rgba(147, 51, 234, 0.5)`;
+            }}
+          >
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
+            </svg>
+            FINAL REPORT
+          </a>
+
+          {/* 2. Litepaper (Bottom Button) */}
+          <a 
+            href="/TrustCycle_Litepaper.pdf" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(147, 51, 234, 0.08)', 
+              border: `1px solid rgba(147, 51, 234, 0.5)`, 
+              color: '#d8b4fe',
+              padding: '0 12px',
+              height: '30px',
+              boxSizing: 'border-box',
+              borderRadius: '100px', 
+              textDecoration: 'none',
+              fontSize: '0.75rem',    
+              fontWeight: 500, 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '135px', 
+              gap: '6px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.2)';
+              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.border = `1px solid ${THEME.accent}`;
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.08)';
+              e.currentTarget.style.color = '#d8b4fe';
               e.currentTarget.style.border = `1px solid rgba(147, 51, 234, 0.5)`;
             }}
           >
