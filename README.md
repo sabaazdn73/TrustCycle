@@ -139,11 +139,7 @@ A live testnet deployment is available. The standalone verifier panel allows ful
 ## Author
 
 **Saba Azadegan**  
-<<<<<<< HEAD
 MSc Business, Católica Lisbon School of Business and Economics   
-=======
-MSc Business, Católica Lisbon School of Business and Economics  
->>>>>>> 6fd2806 (feat: add final report UI and update landing buttons)
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square)](https://www.linkedin.com/in/saba-azadegan-2974b622a)
 [![GitHub](https://img.shields.io/badge/GitHub-Profile-black?style=flat-square)](https://github.com/sabaazdn73)
