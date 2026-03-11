@@ -511,44 +511,92 @@ export default function App() {
           </button>
         ))}
 
-        {/* paper */}
-        <a 
-          href="/TrustCycle_Litepaper.pdf" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{
-            marginLeft: isMobile ? '0' : 'auto', 
-            background: 'rgba(147, 51, 234, 0.1)', 
-            border: `1px solid ${THEME.accent}`, 
-            color: '#d8b4fe',
-            padding: '0 16px',
-            height: '36px',
-            boxSizing: 'border-box',
-            borderRadius: '100px', 
-            textDecoration: 'none',
-            fontSize: '0.8rem',    
-            fontWeight: 600,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'all 0.3s ease',
-            cursor: 'pointer',
-            boxShadow: '0 0 10px rgba(147, 51, 234, 0.2)'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = 'rgba(147, 51, 234, 0.3)';
-            e.currentTarget.style.color = '#fff';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)';
-            e.currentTarget.style.color = '#d8b4fe';
-          }}
-        >
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          LITEPAPER
-        </a>
+        {/* 🚀 Action Buttons Container */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '12px', 
+          marginLeft: isMobile ? '0' : 'auto',
+          alignItems: 'center',
+          flexWrap: 'wrap' // mobile-friendly
+        }}>
+          
+          {/* 1. Final Report / Project Overview (Primary Button) */}
+          <a 
+            href="/final-report.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(147, 51, 234, 0.9)', 
+              border: `1px solid ${THEME.accent}`, 
+              color: '#ffffff',
+              padding: '0 20px',
+              height: '36px',
+              boxSizing: 'border-box',
+              borderRadius: '100px', 
+              textDecoration: 'none',
+              fontSize: '0.8rem',    
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              boxShadow: '0 0 15px rgba(147, 51, 234, 0.4)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 1)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.9)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
+            </svg>
+            FINAL REPORT
+          </a>
+
+          {/* 2. Litepaper (Secondary Button) */}
+          <a 
+            href="/TrustCycle_Litepaper.pdf" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(147, 51, 234, 0.1)', 
+              border: `1px solid ${THEME.accent}`, 
+              color: '#d8b4fe',
+              padding: '0 16px',
+              height: '36px',
+              boxSizing: 'border-box',
+              borderRadius: '100px', 
+              textDecoration: 'none',
+              fontSize: '0.8rem',    
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              boxShadow: '0 0 10px rgba(147, 51, 234, 0.2)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.3)';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.1)';
+              e.currentTarget.style.color = '#d8b4fe';
+            }}
+          >
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            LITEPAPER
+          </a>
+
+        </div>
       </div>
       
       <div style={cardStyle}>
