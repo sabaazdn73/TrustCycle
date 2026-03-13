@@ -981,10 +981,10 @@ export default function App() {
           <TechnicalAssistant />
         </p>
 
-        <p style={{ fontSize: '10px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace' }}>
+        <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace', textAlign: 'center'}}>
           <a href="https://github.com/sabaazdn73/TrustCycle-DRS" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> Demo Walkthrough </a>
           </p>
-          
+
       </div>
     </div>
   );
