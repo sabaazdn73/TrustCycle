@@ -3,7 +3,6 @@ node_modules/
 
 # Environment Variables (Secrets)
 .env
-.env.*
 *.key
 
 # Mac System Files
