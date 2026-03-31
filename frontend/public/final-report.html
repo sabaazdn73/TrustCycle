@@ -49,7 +49,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);f
   z-index: 20; 
 }
 .cover-meta-item .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;}
-.cover-meta-item .value{font-size:15px;color:#e2e8f0;margin-top:4px;}
+.cover-meta-item .value a {
+  color:#e2e8f0; 
+  text-decoration: none; 
+  transition: all 0.2s ease;
+  cursor: pointer; 
+  display: inline-block;
+}
+.cover-meta-item .value a:hover {
+  color: #a78bfa; 
+  text-decoration: underline; 
+  transform: translateY(-1px); 
+}
 
 /* LAYOUT */
 .page{max-width:920px;margin:0 auto;padding:64px 44px;}
