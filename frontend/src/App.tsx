@@ -435,7 +435,7 @@ export default function App() {
     
     <div style={centeredLayout}>
       <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
-      {/* ---  MasterZ logo on mobile --- */}
+      {/* ---  MasterZ iota logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
         top: isMobile ? 10 : 20,    
@@ -446,7 +446,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 40 : 100, // left-up logo conditional
+            height: isMobile ? 30 : 60, // left-up logo conditional
             opacity: 0.9 
           }} 
         />
