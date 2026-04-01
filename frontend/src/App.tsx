@@ -446,7 +446,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 30 : 60, // left-up logo conditional
+            height: isMobile ? 40 : 100, // left-up logo conditional
             opacity: 0.9 
           }} 
         />
