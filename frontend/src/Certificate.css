@@ -1,0 +1,83 @@
+:root {
+  --ink: #0a0a12;
+  --parchment: #f7f4ee;
+  --gold: #c9a84c;
+  --gold-light: #e8d5a3;
+  --gold-dark: #8a6f2e;
+  --purple: #3d1f6e;
+  --purple-mid: #6b3fa0;
+  --purple-light: #c4b5e8;
+  --verified: #1a6b3a;
+  --verified-light: #d4edda;
+  --muted: #6b6b7a;
+  --border: rgba(201,168,76,0.3);
+}
+
+.certificate-wrapper { width: 100%; max-width: 780px; position: relative; margin: 0 auto; text-align: left; }
+.certificate-wrapper::before {
+  content: ''; position: absolute; inset: -2px;
+  background: linear-gradient(135deg, #c9a84c, #6b3fa0, #c9a84c, #3d1f6e);
+  border-radius: 6px; z-index: 0; opacity: 0.8;
+}
+.certificate { position: relative; z-index: 1; background: var(--parchment); border-radius: 4px; overflow: hidden; }
+
+.top-banner {
+  background: linear-gradient(135deg, var(--purple) 0%, #2a1550 40%, #1a0d36 100%);
+  padding: 36px 48px 32px; position: relative; overflow: hidden;
+}
+.top-banner::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%); border-radius: 50%;
+}
+.brand-row { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; position: relative; z-index: 2; }
+.brand-logo {
+  width: 44px; height: 44px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--purple);
+}
+.brand-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--gold-light); text-transform: uppercase; }
+.brand-tagline { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+.cert-title { font-family: 'Cormorant Garamond', serif; font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; position: relative; z-index: 2; }
+.cert-headline { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; color: #fff; line-height: 1.15; position: relative; z-index: 2; font-style: italic; }
+.cert-headline strong { font-weight: 600; font-style: normal; color: var(--gold-light); }
+.gold-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); margin: 0; }
+
+.cert-body { padding: 40px 48px; background: var(--parchment); position: relative;}
+.watermark { position: absolute; bottom: 80px; right: 48px; font-family: 'Cormorant Garamond', serif; font-size: 100px; font-weight: 300; color: rgba(61,31,110,0.04); font-style: italic; pointer-events: none; }
+
+.student-block { text-align: center; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.this-certifies { font-family: 'Cormorant Garamond', serif; font-size: 13px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.student-name { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 300; color: var(--purple); font-style: italic; line-height: 1; margin-bottom: 8px; }
+.student-id-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.id-dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; }
+
+.rec-text-block { background: white; border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 20px 24px; margin-bottom: 28px; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--ink); line-height: 1.7; font-style: italic; }
+.rec-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 8px; font-style: normal; }
+
+.data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.data-field { background: white; border: 1px solid rgba(201,168,76,0.2); border-radius: 6px; padding: 14px 16px; }
+.data-field.full-width { grid-column: 1 / -1; }
+.field-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.field-value { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 500; color: var(--ink); }
+.field-value.mono { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 400; color: var(--purple-mid); word-break: break-all; }
+
+.issuer-block { display: flex; align-items: center; gap: 16px; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 28px; }
+.issuer-avatar { width: 52px; height: 52px; background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--gold-light); }
+.issuer-info { flex: 1; }
+.issuer-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.issuer-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--purple); margin-bottom: 2px; }
+.issuer-email { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.verified-badge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.verified-icon { width: 36px; height: 36px; background: var(--verified-light); border: 1.5px solid var(--verified); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--verified) }
+.verified-text { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--verified); letter-spacing: 1px; text-transform: uppercase; }
+
+.cert-footer { background: linear-gradient(135deg, var(--purple) 0%, #2a1550 100%); padding: 20px 48px; display: flex; align-items: center; justify-content: space-between; }
+.footer-left { display: flex; align-items: center; gap: 10px; }
+.chain-badge { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4); border-radius: 20px; padding: 5px 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold-light); text-transform: uppercase; }
+.footer-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
+.footer-network { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); }
+.footer-right { text-align: right; }
+.footer-date { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+.footer-tx { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(201,168,76,0.6); }
+.export-note { text-align: center; margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1px; }

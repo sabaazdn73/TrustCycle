@@ -54,6 +54,7 @@ const RecSchema = new mongoose.Schema({
     id: String,           
     issuerEmail: String,
     issuerName: String,
+    issuerUniversity: String,
     studentName: String,
     encryptedPassport: String, 
     passportHash: String,      
@@ -209,7 +210,7 @@ const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } 
 
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
-    let { authId, studentName, passport, content, issuerEmail, issuerName } = req.body;
+    let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
     let finalContent = content;
     if (req.file) {
@@ -234,6 +235,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
             "studentName": studentName,
             "passportHash": sha256(passport),
             "recommendationText": finalContent,
+            "issuerUniversity": issuerUniversity
         }
     };
 
@@ -290,6 +292,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       id: recId,
       issuerEmail,
       issuerName,
+      issuerUniversity,
       studentName,
       encryptedPassport, 
       passportHash, 

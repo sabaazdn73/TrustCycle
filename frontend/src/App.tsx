@@ -1,6 +1,7 @@
 import { useState, useEffect} from 'react';
 import BackgroundGlobe from './BackgroundGlobe';
 import TechnicalAssistant from './TechnicalAssistant';
+import Certificate from './Certificate'; 
 
 const THEME = {
   bg: '#050505',
@@ -25,6 +26,7 @@ function useWindowSize() {
 
   return size;
 }
+
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
   const [demoOtp, setDemoOtp] = useState<string>(''); 
@@ -42,6 +44,7 @@ export default function App() {
   const [selectedRec, setSelectedRec] = useState<any>(null);
   const [emailInput, setEmailInput] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
+  const [issuerUniversity, setIssuerUniversity] = useState(''); 
   const [otpInput, setOtpInput] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
@@ -188,6 +191,7 @@ export default function App() {
       formData.append('passport', passport);
       formData.append('issuerEmail', emailInput);
       formData.append('issuerName', identity?.fullName || fullNameInput);
+      formData.append('issuerUniversity', issuerUniversity); // 👈 اضافه شد
       formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7");
 
       // Logic: send pdf or content, backend wil andle it
@@ -274,6 +278,15 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  // 👈 این تابع که جا مونده بود رو آوردم اینجا تا بتونه از handleVerifyId استفاده کنه
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/cert/')) {
+      const id = path.split('/')[2];
+      if (id) handleVerifyId(id);
+    }
+  }, []);
 
   // ---  Download VC JSON ---
   const handleDownloadJSON = async (recId: string) => {
@@ -377,6 +390,7 @@ export default function App() {
     setPassport('');
     setContent('');
     setPdfFile(null);
+    setIssuerUniversity(''); 
     setHistory([]);
     setSearchRes([]);
     setSelectedRec(null);
@@ -434,6 +448,13 @@ export default function App() {
   return (
     
     <div style={centeredLayout}>
+
+      {window.location.pathname.startsWith('/cert/') ? (
+        <div style={{ width: '90%', maxWidth:'800px', zIndex: 10}}>
+          {selectedRec ? <Certificate data={selectedRec} /> : <h2>Loading Certificate ... </h2>}
+        </div>
+      ) : (
+        <>
       <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
       {/* ---  MasterZ iota logo on mobile --- */}
       <div style={{ 
@@ -701,6 +722,13 @@ export default function App() {
             {step === 4 && (
               <div style={{ textAlign: 'left' }}>
                 <button onClick={() => setStep(3)} style={{ color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', marginBottom: '15px', padding: 0 }}>← Back</button>
+                
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '8px' }}>Issuer Information:</p>
+                <input style={inputStyle} placeholder="Your University Name (e.g., Católica Lisbon)" value={issuerUniversity} onChange={e => setIssuerUniversity(e.target.value)} />
+                
+                <hr style={{ borderColor: '#333', margin: '15px 0' }} />
+                
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '8px' }}>Student Information:</p>
                 <input style={inputStyle} placeholder="Student Full Name" value={studentName} onChange={e => setStudentName(e.target.value)} />
                 <input style={inputStyle} placeholder="Student Passport / ID Number" value={passport} onChange={e => setPassport(e.target.value)} />
                 
@@ -843,23 +871,14 @@ export default function App() {
               </>
             )}
 
+          
             {selectedRec && (
-              <div style={{ marginTop: 16, background: '#000', padding: 16, borderRadius: 12, border: '1px solid #333', textAlign: 'left' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <span style={{ fontSize: 11, color: '#666' }}>STATUS</span>
-                    <span style={{ color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444', fontWeight: 'bold', fontSize: 12 }}>{selectedRec.status.toUpperCase()}</span>
-                </div>
+              <div style={{ marginTop: '20px', width: '100%', textAlign: 'center' }}>
+                <Certificate data={selectedRec} />
                 
-                <div style={{ color: '#eee', fontSize: 14, lineHeight: 1.5, marginBottom: 15 }}>
-                  {selectedRec.content.startsWith('file:') 
-                    ? <div style={{color: THEME.accent}}>📄 PDF Recommendation Attached</div> 
-                    : `"${selectedRec.content}"`
-                  }
-                </div>
-                
-                <div style={{ borderTop: '1px solid #222', paddingTop: 12 }}>
+                <div style={{ borderTop: '1px solid #222', paddingTop: 12, marginTop: 15 }}>
                     <p style={{fontSize: 10, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
                       <code style={{fontSize: 12, color: THEME.accent}}>
                         {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
                       </code>
@@ -868,7 +887,19 @@ export default function App() {
                         style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
                       >Copy</button>
                     </div>
-                    <button style={buttonStyle()} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download VC (JSON)</button>
+                    
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                      <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download VC (JSON)</button>
+                      
+                      {selectedRec.content.startsWith('file:') && selectedRec.status === 'Verified' && (
+                        <button 
+                          style={{...buttonStyle('#22c55e'), width: 'auto', padding: '10px 15px'}} 
+                          onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
+                        >
+                          📥 Download PDF
+                        </button>
+                      )}
+                    </div>
                 </div>
               </div>
             )}
@@ -885,35 +916,21 @@ export default function App() {
             <input style={inputStyle} placeholder="Enter Hash Code" value={uniRefInput} onChange={(e) => setUniRefInput(e.target.value)} />
             <button disabled={loading} style={buttonStyle()} onClick={() => handleVerifyId(uniRefInput)}>Verify Authenticity</button>
             
+           
             {selectedRec && (
-              <div style={{ marginTop: 24, padding: 20, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid #333' }}>
-                <div style={{fontSize: 40, marginBottom: 10}}>{selectedRec.status === 'Verified' ? '🛡️' : '⚠️'}</div>
-                <h3 style={{ margin: 0, color: selectedRec.status === 'Verified' ? '#4ade80' : '#ef4444' }}>
-                  {selectedRec.status === 'Verified' ? 'Authentic Document' : 'Invalid'}
-                </h3>
-                {selectedRec.content.startsWith('file:') && (
-                  <button 
-                    style={{ ...buttonStyle('#22c55e'), marginTop: 10 }} 
-                    onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
-                    >
-                      📥 Download Official PDF Document
-                      </button>
-                 )}
-                
-                {selectedRec.status === 'Verified' && (
-                  <div style={{ marginTop: 20, textAlign: 'left' }}>
-                    <div style={{ background: '#000', padding: 15, borderRadius: 8, marginBottom: 15 }}>
-                        <p style={{ fontSize: 10, color: THEME.accent, fontWeight: 'bold', marginBottom: 8 }}>CONTENT</p>
-                        <p style={{ color: '#fff', fontSize: 13, margin: 0 }}>
-                          {selectedRec.content.startsWith('file:') ? "📄 Secure PDF Attachment" : selectedRec.content}
-                        </p>
-                        <div style={{ marginTop: 12, fontSize: 11, color: '#666' }}>
-                          Student: {selectedRec.studentName} | ID: {selectedRec.passport.slice(0,4)}***
-                        </div>
-                    </div>
-                    <button style={buttonStyle()} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download Official VC</button>
-                  </div>
-                )}
+              <div style={{ marginTop: '24px', width: '100%', textAlign: 'center' }}>
+                <Certificate data={selectedRec} />
+                <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download Official VC</button>
+                    {selectedRec.content.startsWith('file:') && selectedRec.status === 'Verified' && (
+                        <button 
+                            style={{...buttonStyle('#22c55e'), width: 'auto', padding: '10px 15px'}} 
+                            onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
+                        >
+                            📥 Download Official PDF
+                        </button>
+                    )}
+                </div>
               </div>
             )}
           </>
@@ -986,6 +1003,8 @@ export default function App() {
           </p>
 
       </div>
+      </>
+      )}
     </div>
   );
 }
