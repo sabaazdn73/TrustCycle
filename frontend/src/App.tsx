@@ -279,7 +279,6 @@ export default function App() {
     }
   };
 
-  // 👈 این تابع که جا مونده بود رو آوردم اینجا تا بتونه از handleVerifyId استفاده کنه
   useEffect(() => {
     const path = window.location.pathname;
     if (path.startsWith('/cert/')) {
@@ -808,6 +807,17 @@ export default function App() {
                     <p style={{fontSize: 11, color: '#666', margin: '0 0 6px'}}>REFERENCE ID</p>
                     <code style={{ color: THEME.accent, fontSize: 13, wordBreak: 'break-all' }}>{issuedRef}</code>
                 </div>
+                
+                <button 
+                  style={{ ...buttonStyle('#c084fc'), marginTop: 15 }} 
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://trustcycle.tech/cert/${issuedRef}`);
+                    alert("🔗 Shareable Link Copied!");
+                  }}
+                >
+                  🔗 Copy Shareable Link
+                </button>
+
                 <button style={{ ...buttonStyle('#222'), marginTop: 24 }} onClick={() => setStep(3)}>Return to Dashboard</button>
               </>
             )}
@@ -883,9 +893,9 @@ export default function App() {
                         {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
                       </code>
                       <button 
-                        onClick={() => {navigator.clipboard.writeText(selectedRec.id); alert('Copied!');}}
+                        onClick={() => {navigator.clipboard.writeText(`https://trustcycle.tech/cert/${selectedRec.id}`); alert('🔗 Direct Link Copied!');}}
                         style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
-                      >Copy</button>
+                      >Copy Link</button>
                     </div>
                     
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
