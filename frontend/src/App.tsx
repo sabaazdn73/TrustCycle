@@ -11,7 +11,7 @@ const THEME = {
 };
 
 type Panel = 'professor' | 'student' | 'university' | 'verifier'| 'provider';
-// --- Custom Hook for Responsive Design ---
+
 function useWindowSize() {
   const [size, setSize] = useState<[number, number]>([0, 0]);
 
@@ -29,7 +29,6 @@ function useWindowSize() {
 
 export default function App() {
   const [panel, setPanel] = useState<Panel>('professor');
-  const [demoOtp, setDemoOtp] = useState<string>(''); 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [issuedRef, setIssuedRef] = useState<string>('');
@@ -141,10 +140,12 @@ export default function App() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
-      const data = await res.json();
+      
       if (res.ok) {
-        if(data.demoOTP || data.demoOtp) setDemoOtp(data.demoOTP || data.demoOtp);
-        setStatusMsg('OTP sent! For demo purposes, you can see it below.');
+        setStatusMsg('OTP sent successfully to your email.');
+      } else {
+        const data = await res.json();
+        setStatusMsg(data.error || 'Failed to send OTP.');
       }
     } catch (e) {
       setStatusMsg('OTP send failed.');
@@ -161,7 +162,6 @@ export default function App() {
         body: JSON.stringify({ email: emailInput, otp: otpInput })
       });
       if (res.ok) {
-        setDemoOtp(''); 
         setStep(3);
       } else {
         const e = await res.json();
@@ -185,16 +185,14 @@ export default function App() {
     }
     setLoading(true);
     try {
-      // Support pdf or text content, require at least one
       const formData = new FormData();
       formData.append('studentName', studentName);
       formData.append('passport', passport);
       formData.append('issuerEmail', emailInput);
       formData.append('issuerName', identity?.fullName || fullNameInput);
-      formData.append('issuerUniversity', issuerUniversity); // 👈 اضافه شد
+      formData.append('issuerUniversity', issuerUniversity); 
       formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7");
 
-      // Logic: send pdf or content, backend wil andle it
       if (pdfFile) {
         formData.append('file', pdfFile);
       } else {
@@ -287,7 +285,6 @@ export default function App() {
     }
   }, []);
 
-  // ---  Download VC JSON ---
   const handleDownloadJSON = async (recId: string) => {
     setLoading(true);
     try {
@@ -311,7 +308,7 @@ export default function App() {
       setLoading(false);
     }
   };
-  //--- Verifier Logic ---
+
   const handleVerifyUploadedVC = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { IotaClient, getFullnodeUrl } = await import('@iota/iota-sdk/client');
     const { verifyPersonalMessageSignature } = await import('@iota/iota-sdk/verify');
@@ -331,11 +328,9 @@ export default function App() {
         
         setVerifyLogs(prev => [...prev, "✅ File parsed. Checking Ed25519 signature..."]);
 
-        // --- Step 1: Offline Cryptographic Check ---
         const signature = credential.proof.proofValue;
         const issuerAddress = credential.issuer.replace('did:iota:', '');
 
-        // Recreate te exact payload
         const vcPayloadForVerification = {
             "@context": credential["@context"],
             "type": credential.type,
@@ -355,7 +350,6 @@ export default function App() {
         }
         setVerifyLogs(prev => [...prev, "✅ Step 1: Signature is VALID. Content is authentic."]);
 
-        // --- Step 2: On-Chain IOTA Check ---
         setVerifyLogs(prev => [...prev, "🌐 Connecting to IOTA Rebased Testnet..."]);
         const client = new IotaClient({ url: getFullnodeUrl('testnet') });
         
@@ -395,7 +389,6 @@ export default function App() {
     setSelectedRec(null);
     setStatusMsg('');
     setCanProceed(false);
-    setDemoOtp('');
     setStudentRefInput('');
     setUniRefInput('');
   };
@@ -455,7 +448,6 @@ export default function App() {
       ) : (
         <>
       <BackgroundGlobe isMobile={isMobile} accentColor={THEME.accent} />
-      {/* ---  MasterZ iota logo on mobile --- */}
       <div style={{ 
         position: 'absolute', 
         top: isMobile ? 10 : 20,    
@@ -466,7 +458,7 @@ export default function App() {
           src="/masterz_iota.png" 
           alt="masterz iota" 
           style={{ 
-            height: isMobile ? 40 : 120, // left-up logo conditional
+            height: isMobile ? 40 : 120, 
             opacity: 0.9 
           }} 
         />
@@ -482,7 +474,7 @@ export default function App() {
           <img src="/logo-galaxy.png" 
           alt="logo" 
           style={{ 
-            width: isMobile ? 40 : 80,  //logo size conditional
+            width: isMobile ? 40 : 80, 
             height: isMobile ? 70 : 110 
             }}/>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-1.5px' }}>
@@ -506,7 +498,6 @@ export default function App() {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-        {/* bottoms*/}
         {(['professor', 'student', 'university', 'verifier', 'provider'] as Panel[]).map(p => (
           <button 
             key={p} 
@@ -531,7 +522,6 @@ export default function App() {
           </button>
         ))}
 
-        {/* 🚀 Action Buttons Container */}
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
@@ -541,7 +531,6 @@ export default function App() {
           marginTop: isMobile ? '12px' : '0'
         }}>
           
-          {/* 1. Final Report / Project Overview (Top Button) */}
           <a 
             href="/final-report.html" 
             target="_blank" 
@@ -565,16 +554,6 @@ export default function App() {
               transition: 'all 0.3s ease',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.2)';
-              e.currentTarget.style.color = '#fff';
-              e.currentTarget.style.border = `1px solid ${THEME.accent}`;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.08)';
-              e.currentTarget.style.color = '#d8b4fe';
-              e.currentTarget.style.border = `1px solid rgba(147, 51, 234, 0.5)`;
-            }}
           >
             <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
@@ -582,7 +561,6 @@ export default function App() {
             FINAL REPORT
           </a>
 
-          {/* 2. Litepaper (Bottom Button) */}
           <a 
             href="/TrustCycle_Litepaper.pdf" 
             target="_blank" 
@@ -606,16 +584,6 @@ export default function App() {
               transition: 'all 0.3s ease',
               cursor: 'pointer',
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.2)';
-              e.currentTarget.style.color = '#fff';
-              e.currentTarget.style.border = `1px solid ${THEME.accent}`;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'rgba(147, 51, 234, 0.08)';
-              e.currentTarget.style.color = '#d8b4fe';
-              e.currentTarget.style.border = `1px solid rgba(147, 51, 234, 0.5)`;
-            }}
           >
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -627,9 +595,6 @@ export default function App() {
       </div>
       
       <div style={cardStyle}>
-        {/* ======================================================
-            PANEL: PROVIDER
-        ====================================================== */}
         {panel === 'provider' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Provider Admin</h2>
@@ -642,9 +607,7 @@ export default function App() {
             {statusMsg && <p style={{ color: THEME.accent, marginTop: '10px', fontSize: 14 }}>{statusMsg}</p>}
           </>
         )}
-        {/* ======================================================
-            PROFESSOR PANEL
-        ====================================================== */}
+        
         {panel === 'professor' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Professor Portal</h2>
@@ -666,22 +629,6 @@ export default function App() {
                   Welcome back, <strong style={{ color: '#fff' }}>{identity?.fullName || fullNameInput}</strong>.
                 </p>
                 
-                {/* --- DEMO OTP BOX --- */}
-                {demoOtp && (
-                  <div style={{ 
-                    background: 'rgba(147, 51, 234, 0.1)', 
-                    border: '1px dashed #9333ea', 
-                    padding: '10px', 
-                    borderRadius: '10px', 
-                    marginBottom: '15px',
-                    color: '#9333ea',
-                    fontSize: '14px',
-                    fontWeight: 'bold'
-                  }}>
-                    ✨ Demo Access Code: {demoOtp}
-                  </div>
-                )}
-
                 <div style={{ display: 'flex', gap: 8 }}>
                     <input style={{...inputStyle, marginBottom: 0}} placeholder="Enter OTP Code" value={otpInput} onChange={e => setOtpInput(e.target.value)} />
                     <button 
@@ -734,7 +681,6 @@ export default function App() {
                 <hr style={{ borderColor: '#333', margin: '15px 0' }} />
                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '10px' }}>Write recommendation <b>OR</b> upload PDF:</p>
 
-                {/* content field*/}
                 <textarea 
                   style={{ 
                     ...inputStyle, 
@@ -748,7 +694,6 @@ export default function App() {
                   disabled={!!pdfFile} 
                 />
 
-                {/* file field*/}
                 <input 
                   type="file" 
                   accept=".pdf"
@@ -824,9 +769,6 @@ export default function App() {
           </>
         )}
 
-        {/* ======================================================
-            PANEL: STUDENT VAULT
-        ====================================================== */}
         {panel === 'student' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>Student Vault</h2>
@@ -916,9 +858,6 @@ export default function App() {
           </>
         )}
 
-        {/* ======================================================
-            PANEL: UNIVERSITY CHECK
-        ====================================================== */}
         {panel === 'university' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>University Check</h2>
@@ -946,9 +885,6 @@ export default function App() {
           </>
         )}
 
-        {/* ======================================================
-            PANEL: VERIFIER
-        ====================================================== */}
         {panel === 'verifier' && (
           <>
             <h2 style={{ color: THEME.accent, marginTop: 0 }}>🛡️ Standalone Verifier</h2>
@@ -986,9 +922,6 @@ export default function App() {
      )}
      </div>
 
-      {/* ======================================================
-          FOOTER SECTION
-      ====================================================== */}
       <div style={{ 
           position: isMobile ? 'relative' : 'absolute', bottom: isMobile ? 'auto' : 20, right: isMobile ? 'auto' : 30,
           marginTop: isMobile ? '40px' : 0, paddingBottom: isMobile ? '20px' : 0, zIndex: 30, textAlign: isMobile ? 'center' : 'right'
