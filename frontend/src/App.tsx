@@ -90,7 +90,7 @@ export default function App() {
   const handleAdminWhitelist = async (action: 'add' | 'delete') => {
     setLoading(true);
     try {
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/admin/whitelist', {
+      const res = await fetch('https://trustcycle.onrender.com/api/admin/whitelist', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, adminKey, action })
       });
@@ -111,7 +111,7 @@ export default function App() {
     setLoading(true);
     setStatusMsg('Verifying identity — this may take a few seconds...');
     try {
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/verify-email', {
+      const res = await fetch('https://trustcycle.onrender.com/api/auth/verify-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, fullName: fullNameInput })
       });
@@ -136,7 +136,7 @@ export default function App() {
   const sendOtp = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/send-otp', {
+      const res = await fetch('https://trustcycle.onrender.com/api/auth/send-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
@@ -145,10 +145,10 @@ export default function App() {
         setStatusMsg('OTP sent successfully to your email.');
       } else {
         const data = await res.json();
-        setStatusMsg(data.error || 'Failed to send OTP.');
+        setStatusMsg('Backend Error: ' + (data.error || 'Failed to send OTP.'));
       }
     } catch (e) {
-      setStatusMsg('OTP send failed.');
+      setStatusMsg('Network Error: Could not reach backend.');
     } finally {
       setLoading(false);
     }
@@ -157,7 +157,7 @@ export default function App() {
   const handleVerifyOTP = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/auth/verify-otp', {
+      const res = await fetch('https://trustcycle.onrender.com/api/auth/verify-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailInput, otp: otpInput })
       });
@@ -199,7 +199,7 @@ export default function App() {
         formData.append('content', content);
       }
 
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/issue', {
+      const res = await fetch('https://trustcycle.onrender.com/api/issue', {
         method: 'POST',
         body: formData 
       });
@@ -223,7 +223,7 @@ export default function App() {
     
     setLoading(true);
     try {
-        const res = await fetch('https://trustcycle-drs.onrender.com/api/revoke', { 
+        const res = await fetch('https://trustcycle.onrender.com/api/revoke', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recId, email: emailInput })
@@ -245,7 +245,7 @@ export default function App() {
   const handleStudentSearch = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://trustcycle-drs.onrender.com/api/student/search', {
+      const res = await fetch('https://trustcycle.onrender.com/api/student/search', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ studentName, passport })
       });
@@ -263,7 +263,7 @@ export default function App() {
     if(!id) return;
     setLoading(true);
     try {
-      const res = await fetch(`https://trustcycle-drs.onrender.com/api/verify/${id}`);
+      const res = await fetch(`https://trustcycle.onrender.com/api/verify/${id}`);
       if (res.ok) {
         const data = await res.json();
         setSelectedRec(data);
@@ -288,7 +288,7 @@ export default function App() {
   const handleDownloadJSON = async (recId: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://trustcycle-drs.onrender.com/api/vc/${recId}`);
+      const response = await fetch(`https://trustcycle.onrender.com/api/vc/${recId}`);
       if (!response.ok) throw new Error("Verifiable Credential not found");
       const vcData = await response.json();
 
