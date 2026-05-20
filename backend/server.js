@@ -234,26 +234,23 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN)
+   6. ISSUE RECOMMENDATION (ON-CHAIN) - اصلاح شده و ایمن
 ===================================================== */
-const multer = require('multer');
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
-    let finalContent = content;
+    // 1. اعتبارسنجی اولیه
+    if (!authId || authId === 'undefined') throw new Error("AuthID نامعتبر است.");
+    if (!PACKAGE_ID) throw new Error("PACKAGE_ID در سرور تنظیم نشده.");
+    if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID در سرور تنظیم نشده.");
+
+    let finalContent = content || "";
     if (req.file) {
-      const base64Data = req.file.buffer.toString('base64');
-      finalContent = `file:${req.file.mimetype};base64,${base64Data}`;
+      finalContent = `file:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
-    if (!authId || !studentName || !passport || !finalContent) {
-      return res.status(400).json({ error: "Missing required fields (Name, Passport, and Recommendation Content/File)" });
-    }
-
+    // 2. ساخت VC
     const vcPayload = {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
         "type": ["VerifiableCredential", "AcademicRecommendation"],
@@ -268,46 +265,31 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     };
 
     const payloadString = JSON.stringify(vcPayload);
-    const messageBytes = new TextEncoder().encode(payloadString);
-    const { signature } = await adminKeypair.signPersonalMessage(messageBytes);
-
-    const signedVc = {
-        ...vcPayload,
-        "proof": {
-            "type": "Ed25519Signature2018",
-            "created": new Date().toISOString(),
-            "verificationMethod": `did:iota:${adminAddress}#keys-1`,
-            "proofPurpose": "assertionMethod",
-            "proofValue": signature
-        }
-    };
-
-    const vcString = JSON.stringify(signedVc);
-    const contentHash = sha256(vcString);
-
-    if (!PACKAGE_ID) throw new Error("PACKAGE_ID is missing in Render Environment Variables.");
-    if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID is missing in Render Environment Variables.");
+    const { signature } = await adminKeypair.signPersonalMessage(new TextEncoder().encode(payloadString));
+    const signedVc = { ...vcPayload, proof: { type: "Ed25519Signature2018", proofValue: signature } };
+    const contentHash = sha256(JSON.stringify(signedVc));
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
     
-    // ---- THE MAGIC FIX FOR RENDER BIGINT ERROR ----
+    // تنظیمات دستی برای جلوگیری از ارور BigInt در محیط ابری
     tx.setSender(adminAddress);
-    tx.setGasBudget(200000000); 
-    // -----------------------------------------------
+    tx.setGasBudget(500000000); // 500 million MIST
 
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
+    // 3. فراخوانی تابع Move
+    // استفاده از tx.pure.vector که دقیقاً با vector<u8> در Move مچ میشه
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
       arguments: [
         tx.object(authId.trim()),                               
-        tx.object(PROTOCOL_CONFIG_ID),                   
-        tx.pure(stringToBytes(studentName), 'vector<u8>'),
-        tx.pure(hexToBytes(passportHash), 'vector<u8>'),
-        tx.pure(hexToBytes(contentHash), 'vector<u8>'),
-        tx.object('0x6')                                 
+        tx.object(PROTOCOL_CONFIG_ID.trim()),                   
+        tx.pure.vector('u8', Array.from(stringToBytes(studentName))),
+        tx.pure.vector('u8', Array.from(hexToBytes(passportHash))),  
+        tx.pure.vector('u8', Array.from(hexToBytes(contentHash))),   
+        tx.object('0x6') // Clock Object                               
       ]
     });
 
@@ -315,26 +297,15 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       transaction: tx, signer: adminKeypair, options: { showObjectChanges: true, showEffects: true }
     });
 
-    if (result.effects.status.status !== 'success') throw new Error(`Transaction Failed: ${result.effects.status.error}`);
+    if (result.effects.status.status !== 'success') throw new Error(`TX Failed: ${result.effects.status.error}`);
 
-    const createdObj = result.objectChanges?.find(o => o.type === 'created' && o.objectType.includes('Recommendation'));
-    const recId = createdObj ? createdObj.objectId : 'Unknown';
+    const recId = result.objectChanges?.find(o => o.type === 'created' && o.objectType.includes('Recommendation'))?.objectId;
 
-    const newRecord = new Recommendation({
-      id: recId,
-      issuerEmail,
-      issuerName,
-      issuerUniversity,
-      studentName,
-      encryptedPassport, 
-      passportHash, 
-      content: finalContent,  
-      contentHash,
-      vc: signedVc,
-      status: 'Verified',
-      txDigest: result.digest,
-    });
-    await newRecord.save(); 
+    await new Recommendation({
+      id: recId, issuerEmail, issuerName, issuerUniversity, studentName,
+      encryptedPassport, passportHash, content: finalContent, contentHash,
+      vc: signedVc, status: 'Verified', txDigest: result.digest,
+    }).save(); 
 
     res.json({ success: true, recId, txId: result.digest });
 
