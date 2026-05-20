@@ -234,26 +234,28 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN)
-====================================================== */
-
+   6. ISSUE RECOMMENDATION (ON-CHAIN) - With Safety Defaults
+===================================================== */
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
+    // لایه محافظتی برای پر کردنِ مقادیر خالی با مقادیر پیش‌فرض
+    const safeStudentName = (studentName && studentName.trim() !== "") ? studentName : "N/A";
+    const safePassport = (passport && passport.trim() !== "") ? passport : "00000000";
+    const safeContent = (content && content.trim() !== "") ? content : "No Content Provided";
+    const safeIssuerUniversity = (issuerUniversity && issuerUniversity.trim() !== "") ? issuerUniversity : "N/A";
+
+    // اطمینان از فرمت Hex برای آیدی‌ها
     const ensureHex = (str) => {
         if (!str) return "0x0000000000000000000000000000000000000000000000000000000000000000";
         return str.trim().startsWith('0x') ? str.trim() : `0x${str.trim()}`;
     };
 
-    let finalContent = content;
+    let finalContent = safeContent;
     if (req.file) {
       const base64Data = req.file.buffer.toString('base64');
       finalContent = `file:${req.file.mimetype};base64,${base64Data}`;
-    }
-
-    if (!authId || !studentName || !passport || !finalContent) {
-      return res.status(400).json({ error: "Missing required fields (Name, Passport, and Recommendation Content/File)" });
     }
 
     /* ======================================================
@@ -265,10 +267,10 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
         "issuer": `did:iota:${adminAddress}`,
         "issuanceDate": new Date().toISOString(),
         "credentialSubject": {
-            "studentName": studentName,
-            "passportHash": sha256(passport),
+            "studentName": safeStudentName,
+            "passportHash": sha256(safePassport),
             "recommendationText": finalContent,
-            "issuerUniversity": issuerUniversity
+            "issuerUniversity": safeIssuerUniversity
         }
     };
 
@@ -295,11 +297,11 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     ====================================================== */
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
-    const passportHash = sha256(passport); 
-    const encryptedPassport = encrypt(passport); 
+    const passportHash = sha256(safePassport); 
+    const encryptedPassport = encrypt(safePassport); 
 
+    // تنظیم بودجه گاز با مقدار ثابت BigInt
     tx.setSender(adminAddress);
-    // استفاده از BigInt برای جلوگیری از ارور undefined
     tx.setGasBudget(BigInt(500000000)); 
 
     tx.moveCall({
@@ -307,7 +309,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       arguments: [
         tx.object(ensureHex(authId)),                        
         tx.object(ensureHex(PROTOCOL_CONFIG_ID)),            
-        tx.pure.vector('u8', stringToBytes(studentName)),
+        tx.pure.vector('u8', stringToBytes(safeStudentName)),
         tx.pure.vector('u8', hexToBytes(passportHash)),  
         tx.pure.vector('u8', hexToBytes(contentHash)),   
         tx.object('0x6')                                   
@@ -318,7 +320,10 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       transaction: tx, signer: adminKeypair, options: { showObjectChanges: true, showEffects: true }
     });
 
-    if (result.effects.status.status !== 'success') throw new Error(`Transaction Failed: ${result.effects.status.error}`);
+    if (!result.effects || result.effects.status.status !== 'success') {
+        const errorMsg = result.effects?.status?.error || "Unknown Transaction Error";
+        throw new Error(`Transaction Failed: ${errorMsg}`);
+    }
 
     const createdObj = result.objectChanges?.find(o => o.type === 'created' && o.objectType.includes('Recommendation'));
     const recId = createdObj ? createdObj.objectId : 'Unknown';
@@ -327,8 +332,8 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       id: recId,
       issuerEmail,
       issuerName,
-      issuerUniversity,
-      studentName,
+      issuerUniversity: safeIssuerUniversity,
+      studentName: safeStudentName,
       encryptedPassport, 
       passportHash, 
       content: finalContent,  
