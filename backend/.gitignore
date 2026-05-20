@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment Variables (Secrets)
+.env
+.key
+
+# Mac System Files
+.DS_Store
+
+# Build Outputs (Frontend & Backend)
+dist/
+build/
+
+# Move/IOTA Build Files (Important)
+build/
+*.lock
