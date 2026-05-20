@@ -234,19 +234,18 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN)
+   6. ISSUE RECOMMENDATION (ON-CHAIN) - دیباگ شده
 ===================================================== */
-const multer = require('multer');
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
-    if (!authId || !studentName || !passport) {
-      throw new Error("Missing required fields (Name, Passport, or AuthID)");
-    }
+    // دیباگ: لاگ کردن متغیرهای ورودی
+    console.log("DEBUG INPUTS:", { authId, PACKAGE_ID, PROTOCOL_CONFIG_ID });
+    
+    if (!authId || authId === 'undefined') throw new Error("authId is undefined");
+    if (!PACKAGE_ID) throw new Error("PACKAGE_ID is undefined");
+    if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID is undefined");
 
     let finalContent = content || "";
     if (req.file) {
@@ -269,7 +268,8 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const tx = new Transaction();
     
     tx.setSender(adminAddress);
-    tx.setGasBudget(BigInt(500000000)); 
+    // استفاده از عدد ساده بجای BigInt برای اطمینان از سازگاری
+    tx.setGasBudget(500000000); 
 
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
@@ -282,7 +282,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
         tx.pure.vector('u8', Array.from(stringToBytes(studentName))),
         tx.pure.vector('u8', Array.from(hexToBytes(passportHash))),
         tx.pure.vector('u8', Array.from(hexToBytes(contentHash))),
-        tx.object('0x6') // Clock object
+        tx.object('0x6') 
       ]
     });
 
@@ -304,7 +304,8 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
 
     res.json({ success: true, recId, txId: result.digest });
   } catch (e) {
-    console.error("Blockchain Error (Detailed):", e.message);
+    // چاپ دقیق‌تر خطا
+    console.error("Blockchain Error (Detailed):", e); 
     res.status(500).json({ error: e.message });
   }
 });
