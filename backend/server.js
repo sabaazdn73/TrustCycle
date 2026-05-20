@@ -76,6 +76,13 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PACKAGE_ID = process.env.PACKAGE_ID;
 const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID; 
+
+// FIX: Validate configuration to prevent BigInt undefined errors at runtime
+if (!PACKAGE_ID || !PROTOCOL_CONFIG_ID) {
+    console.error("❌ Critical Error: PACKAGE_ID or PROTOCOL_CONFIG_ID is missing in .env. The app will fail to create transactions.");
+    process.exit(1);
+}
+
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
 const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7";
@@ -191,7 +198,8 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
-  console.log(`🔐 OTP Generated for ${email}: ${otp}`);
+  // SECURITY FIX: Removed OTP printing to logs for user privacy
+  console.log(`🔐 OTP Generated for email: ${email}`);
 
   try {
     if (process.env.RESEND_API_KEY) {
@@ -218,7 +226,7 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
     }
   } catch (err) {
     console.error("❌ Resend API Error:", err);
-    res.status(500).json({ error: err.message || 'Failed to send email.' });
+    res.status(500).json({ error: 'Failed to send email.' });
   }
 });
 
@@ -286,6 +294,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
+    // No changes to logic, just proceeding with secure transaction
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
       arguments: [
@@ -326,8 +335,8 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     res.json({ success: true, recId, txId: result.digest });
 
   } catch (e) {
-    console.error("Blockchain Error:", e);
-    res.status(500).json({ error: e.message || "Transaction failed" });
+    console.error("Blockchain Error:", e.message); // Only log error message
+    res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -360,6 +369,7 @@ app.post('/api/revoke', async (req, res) => {
         await record.save();
         res.json({ success: true, txDigest: result.digest });
     } catch (e) {
+        console.error("Revocation Error:", e.message);
         res.status(500).json({ error: "Revocation failed" });
     }
 });
@@ -391,7 +401,7 @@ app.get('/api/verify/:id', async (req, res) => {
     let decryptedPassport = '';
     if (record.encryptedPassport) {
         try { decryptedPassport = decrypt(record.encryptedPassport); } 
-        catch (err) { console.error("Decryption failed", err); }
+        catch (err) { console.error("Decryption failed"); }
     }
 
     try {
@@ -404,7 +414,7 @@ app.get('/api/verify/:id', async (req, res) => {
             }
         }
     } catch (chainErr) {
-        console.warn("Blockchain check failed:", chainErr.message);
+        console.warn("Blockchain check warning");
     }
 
     const responseData = { ...record.toObject(), passport: decryptedPassport };
@@ -435,7 +445,6 @@ app.get('/api/vc/:id', async (req, res) => {
     res.json(portableCredential); 
 
   } catch (e) {
-      console.error(e);
       res.status(500).json({ error: "Failed" });
   }
 });
@@ -457,7 +466,7 @@ app.get('/api/certificate/:id', async (req, res) => {
         onChainActive = onChainObj.data.content.fields.active;
       }
     } catch (chainErr) {
-      console.warn("On-chain check failed:", chainErr.message);
+      console.warn("On-chain check warning");
     }
 
 
