@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose')
 const axios = require('axios');
 const { sha256 } = require('js-sha256');
-const crypto = require('crypto'); // FIX: Duplicate removed
+const crypto = require('crypto');
 const { IotaClient, getFullnodeUrl } = require('@iota/iota-sdk/client');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
@@ -14,10 +14,10 @@ const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
-app.set('trust proxy', 1); // FIX: Required for Render to avoid X-Forwarded-For error
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cors());
-app.use(upload.single('file'));
+
 /* ======================================================
    0. ENCRYPTION UTILS (For Passport Privacy)
 ====================================================== */
@@ -73,17 +73,16 @@ const RecSchema = new mongoose.Schema({
 const Recommendation = mongoose.model('Recommendation', RecSchema);
 
 /* ======================================================
-   1. IOTA + SERVICE SETUP (FIX: Trim hidden spaces from Render)
+   1. IOTA + SERVICE SETUP
 ====================================================== */
 const client = new IotaClient({ url: process.env.IOTA_NODE_URL || getFullnodeUrl('testnet') });
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PACKAGE_ID = process.env.PACKAGE_ID ? process.env.PACKAGE_ID.trim() : undefined;
 const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID ? process.env.PROTOCOL_CONFIG_ID.trim() : undefined; 
+const ISSUER_AUTH_ID = process.env.ISSUER_AUTH_ID ? process.env.ISSUER_AUTH_ID.trim() : undefined;
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
-
-const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7".trim();
 
 if (!process.env.ISSUER_MNEMONIC) {
     console.error("❌ Error: ISSUER_MNEMONIC is missing in .env");
@@ -100,7 +99,7 @@ let whitelist = ['s-sazadegan@ucp.pt', 'admin@trustcycle.edu'];
 let otpStore = {};
 
 /* ======================================================
-   2.5 RATE LIMITING (Fix: Added skip for Saba)
+   2.5 RATE LIMITING
 ====================================================== */
 const skipSaba = (req) => req.body.email === 's-sazadegan@ucp.pt';
 
@@ -125,7 +124,7 @@ const hexToBytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 const stringToBytes = (str) => new TextEncoder().encode(str);
 
 /* ======================================================
-   4. IDENTITY LOOKUP (SERP / GOOGLE)
+   4. IDENTITY LOOKUP
 ====================================================== */
 const verifyWebPresence = async (email, fullName) => {
   try {
@@ -198,7 +197,6 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
-  // SECURITY FIX: Sanitized log
   console.log(`🔐 OTP Generated for email: ${email}`);
 
   try {
@@ -236,15 +234,23 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN) - دیباگ شده
-===================================================== */
+   6. ISSUE RECOMMENDATION (ON-CHAIN)
+====================================================== */
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
-    // دیباگ: لاگ کردن متغیرهای ورودی
-    console.log("DEBUG INPUTS:", { authId, PACKAGE_ID, PROTOCOL_CONFIG_ID });
-    
+    const ensureHex = (str) => {
+        if (!str) return "0x0000000000000000000000000000000000000000000000000000000000000000";
+        return str.startsWith('0x') ? str : `0x${str}`;
+    };
+
+    console.log("DEBUG: Arguments sending to Move:", {
+        authId: ensureHex(authId),
+        package: ensureHex(PACKAGE_ID),
+        protocol: ensureHex(PROTOCOL_CONFIG_ID)
+    });
+
     if (!authId || authId === 'undefined') throw new Error("authId is undefined");
     if (!PACKAGE_ID) throw new Error("PACKAGE_ID is undefined");
     if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID is undefined");
@@ -270,17 +276,16 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const tx = new Transaction();
     
     tx.setSender(adminAddress);
-    // استفاده از عدد ساده بجای BigInt برای اطمینان از سازگاری
     tx.setGasBudget(500000000); 
 
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
     tx.moveCall({
-      target: `${PACKAGE_ID.trim()}::recommendation::issue_recommendation`,
+      target: `${ensureHex(PACKAGE_ID)}::recommendation::issue_recommendation`,
       arguments: [
-        tx.object(authId.trim()), 
-        tx.object(PROTOCOL_CONFIG_ID.trim()),
+        tx.object(ensureHex(authId.trim())), 
+        tx.object(ensureHex(PROTOCOL_CONFIG_ID.trim())),
         tx.pure.vector('u8', Array.from(stringToBytes(studentName))),
         tx.pure.vector('u8', Array.from(hexToBytes(passportHash))),
         tx.pure.vector('u8', Array.from(hexToBytes(contentHash))),
@@ -306,7 +311,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
 
     res.json({ success: true, recId, txId: result.digest });
   } catch (e) {
-    // چاپ دقیق‌تر خطا
     console.error("Blockchain Error (Detailed):", e); 
     res.status(500).json({ error: e.message });
   }
@@ -321,17 +325,17 @@ app.post('/api/revoke', async (req, res) => {
         const record = await Recommendation.findOne({ id: recId });
         if (!record) return res.status(404).json({error: "Record not found"});
         
-        const tx = new Transaction();
+        const ensureHex = (str) => (str.startsWith('0x') ? str : `0x${str}`);
         
-        // ---- FIX APPLIED HERE AS WELL ----
+        const tx = new Transaction();
         tx.setSender(adminAddress);
         tx.setGasBudget(100000000);
         
         tx.moveCall({
-            target: `${PACKAGE_ID}::recommendation::revoke_recommendation`,
+            target: `${ensureHex(PACKAGE_ID)}::recommendation::revoke_recommendation`,
             arguments: [
-                tx.object(ISSUER_AUTH_ID),         
-                tx.object(PROTOCOL_CONFIG_ID),     
+                tx.object(ensureHex(ISSUER_AUTH_ID.trim())),         
+                tx.object(ensureHex(PROTOCOL_CONFIG_ID.trim())),     
                 tx.object(recId.trim())                   
             ]
         });
