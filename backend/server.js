@@ -236,15 +236,11 @@ app.post('/api/auth/verify-otp', (req, res) => {
 /* ======================================================
    6. ISSUE RECOMMENDATION (ON-CHAIN)
 ====================================================== */
-const multer = require('multer');
-const storage = multer.memoryStorage(); 
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
-    // متغیرهای کمکی برای اطمینان از فرمت صحیح
     const ensureHex = (str) => {
         if (!str) return "0x0000000000000000000000000000000000000000000000000000000000000000";
         return str.trim().startsWith('0x') ? str.trim() : `0x${str.trim()}`;
