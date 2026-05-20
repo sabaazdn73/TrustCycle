@@ -234,70 +234,65 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN) - اصلاح شده و ایمن
+   6. ISSUE RECOMMENDATION (ON-CHAIN)
 ===================================================== */
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
     let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
 
-    // 1. اعتبارسنجی اولیه
-    if (!authId || authId === 'undefined') throw new Error("AuthID نامعتبر است.");
-    if (!PACKAGE_ID) throw new Error("PACKAGE_ID در سرور تنظیم نشده.");
-    if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID در سرور تنظیم نشده.");
+    if (!authId || !studentName || !passport) {
+      throw new Error("Missing required fields (Name, Passport, or AuthID)");
+    }
 
     let finalContent = content || "";
     if (req.file) {
       finalContent = `file:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
-    // 2. ساخت VC
     const vcPayload = {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
         "type": ["VerifiableCredential", "AcademicRecommendation"],
         "issuer": `did:iota:${adminAddress}`,
         "issuanceDate": new Date().toISOString(),
-        "credentialSubject": {
-            "studentName": studentName,
-            "passportHash": sha256(passport),
-            "recommendationText": finalContent,
-            "issuerUniversity": issuerUniversity
-        }
+        "credentialSubject": { studentName, passportHash: sha256(passport), recommendationText: finalContent, issuerUniversity }
     };
 
-    const payloadString = JSON.stringify(vcPayload);
-    const { signature } = await adminKeypair.signPersonalMessage(new TextEncoder().encode(payloadString));
+    const { signature } = await adminKeypair.signPersonalMessage(new TextEncoder().encode(JSON.stringify(vcPayload)));
     const signedVc = { ...vcPayload, proof: { type: "Ed25519Signature2018", proofValue: signature } };
     const contentHash = sha256(JSON.stringify(signedVc));
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
     
-    // تنظیمات دستی برای جلوگیری از ارور BigInt در محیط ابری
     tx.setSender(adminAddress);
-    tx.setGasBudget(500000000); // 500 million MIST
+    tx.setGasBudget(BigInt(500000000)); 
 
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
-    // 3. فراخوانی تابع Move
-    // استفاده از tx.pure.vector که دقیقاً با vector<u8> در Move مچ میشه
     tx.moveCall({
-      target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
+      target: `${PACKAGE_ID.trim()}::recommendation::issue_recommendation`,
       arguments: [
-        tx.object(authId.trim()),                               
-        tx.object(PROTOCOL_CONFIG_ID.trim()),                   
+        tx.object(authId.trim()), 
+        tx.object(PROTOCOL_CONFIG_ID.trim()),
         tx.pure.vector('u8', Array.from(stringToBytes(studentName))),
-        tx.pure.vector('u8', Array.from(hexToBytes(passportHash))),  
-        tx.pure.vector('u8', Array.from(hexToBytes(contentHash))),   
-        tx.object('0x6') // Clock Object                               
+        tx.pure.vector('u8', Array.from(hexToBytes(passportHash))),
+        tx.pure.vector('u8', Array.from(hexToBytes(contentHash))),
+        tx.object('0x6') // Clock object
       ]
     });
 
     const result = await client.signAndExecuteTransaction({
-      transaction: tx, signer: adminKeypair, options: { showObjectChanges: true, showEffects: true }
+      transaction: tx, signer: adminKeypair
     });
 
-    if (result.effects.status.status !== 'success') throw new Error(`TX Failed: ${result.effects.status.error}`);
+    if (result.effects?.status?.status !== 'success') {
+        throw new Error(`TX Failed: ${result.effects?.status?.error || 'Unknown'}`);
+    }
 
     const recId = result.objectChanges?.find(o => o.type === 'created' && o.objectType.includes('Recommendation'))?.objectId;
 
@@ -308,10 +303,9 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     }).save(); 
 
     res.json({ success: true, recId, txId: result.digest });
-
   } catch (e) {
-    console.error("Blockchain Error:", e.message);
-    res.status(500).json({ error: e.message || "Transaction failed" });
+    console.error("Blockchain Error (Detailed):", e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
