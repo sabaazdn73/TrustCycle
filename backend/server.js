@@ -12,14 +12,15 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-app.set('trust proxy', 1); // FIX: Required for Render reverse proxy — fixes ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1); // FIX: Required for Render to avoid X-Forwarded-For error
 app.use(express.json());
 app.use(cors());
 
 /* ======================================================
-   0. ENCRYPTION UTILS
+   0. ENCRYPTION UTILS (For Passport Privacy)
 ====================================================== */
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
     console.error("❌ Error: ENCRYPTION_KEY is missing or not exactly 32 characters in .env");
     process.exit(1);
@@ -45,7 +46,7 @@ function decrypt(text) {
 }
 
 /* ======================================================
-   0.1 DATABASE CONNECTION
+   0.1 DATABASE CONNECTION (MongoDB) 
 ====================================================== */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas (Persistent Storage)'))
@@ -77,15 +78,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PACKAGE_ID = process.env.PACKAGE_ID;
 const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID; 
-
-// FIX: Validate configuration to prevent BigInt undefined errors at runtime
-if (!PACKAGE_ID || !PROTOCOL_CONFIG_ID) {
-    console.error("❌ Critical Error: PACKAGE_ID or PROTOCOL_CONFIG_ID is missing in .env. The app will fail to create transactions.");
-    process.exit(1);
-}
-
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
+
 const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7";
 
 if (!process.env.ISSUER_MNEMONIC) {
@@ -103,22 +98,26 @@ let whitelist = ['s-sazadegan@ucp.pt', 'admin@trustcycle.edu'];
 let otpStore = {};
 
 /* ======================================================
-   2.5 RATE LIMITING
+   2.5 RATE LIMITING (Fix: Added skip for Saba)
 ====================================================== */
+const skipSaba = (req) => req.body.email === 's-sazadegan@ucp.pt';
+
 const otpLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
   max: 3,
+  skip: skipSaba,
   message: { error: 'Too many OTP requests. Please try again tomorrow.' }
 });
 
 const verifyLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
+  skip: skipSaba,
   message: { error: 'Too many requests. Please try again later.' }
 });
 
 /* ======================================================
-   3. HELPERS
+   3. HELPER: STRING TO BYTES
 ====================================================== */
 const hexToBytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 const stringToBytes = (str) => new TextEncoder().encode(str);
@@ -197,7 +196,7 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
-  // SECURITY FIX: Removed OTP printing to logs for user privacy
+  // SECURITY FIX: Sanitized log
   console.log(`🔐 OTP Generated for email: ${email}`);
 
   try {
@@ -206,23 +205,13 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
           from: process.env.EMAIL_FROM || 'onboarding@resend.dev', 
           to: email,
           subject: 'TrustCycle Verification Code',
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 32px;">
-              <h2 style="color: #7B2D8B;">TrustCycle</h2>
-              <p>Your verification code is:</p>
-              <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7B2D8B; padding: 16px 0;">
-                ${otp}
-              </div>
-              <p style="color: #666; font-size: 13px;">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>
-            </div>
-          `
+          html: `<p>Your verification code is: <strong>${otp}</strong></p>`
         });
-        res.json({ success: true, message: "Verification code sent to your email." });
+        res.json({ success: true, message: "Email sent" });
     } else {
-        res.json({ success: true, message: "Dev mode: check server console for OTP." });
+        res.json({ success: true, message: "OTP logged to console (Dev Mode)" });
     }
   } catch (err) {
-    console.error("❌ Resend API Error:", err);
     res.status(500).json({ error: 'Failed to send email.' });
   }
 });
@@ -238,8 +227,8 @@ app.post('/api/auth/verify-otp', (req, res) => {
    6. ISSUE RECOMMENDATION (ON-CHAIN)
 ===================================================== */
 const multer = require('multer');
-const storageEngine = multer.memoryStorage();
-const upload = multer({ storage: storageEngine, limits: { fileSize: 5 * 1024 * 1024 } });
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
@@ -291,6 +280,9 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
+    // Guard against undefined params
+    if (!PACKAGE_ID || !PROTOCOL_CONFIG_ID) throw new Error("Missing Chain Config");
+
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
       arguments: [
@@ -332,7 +324,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
 
   } catch (e) {
     console.error("Blockchain Error:", e.message);
-    res.status(500).json({ error: "Transaction failed" });
+    res.status(500).json({ error: e.message || "Transaction failed" });
   }
 });
 
@@ -397,7 +389,7 @@ app.get('/api/verify/:id', async (req, res) => {
     let decryptedPassport = '';
     if (record.encryptedPassport) {
         try { decryptedPassport = decrypt(record.encryptedPassport); } 
-        catch (err) { console.error("Decryption failed"); }
+        catch (err) { console.error("Decryption failed", err); }
     }
 
     try {
@@ -410,7 +402,7 @@ app.get('/api/verify/:id', async (req, res) => {
             }
         }
     } catch (chainErr) {
-        console.warn("Blockchain check warning");
+        console.warn("Blockchain check failed:", chainErr.message);
     }
 
     const responseData = { ...record.toObject(), passport: decryptedPassport };
@@ -441,6 +433,7 @@ app.get('/api/vc/:id', async (req, res) => {
     res.json(portableCredential); 
 
   } catch (e) {
+      console.error(e);
       res.status(500).json({ error: "Failed" });
   }
 });
