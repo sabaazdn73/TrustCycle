@@ -3,8 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose')
 const axios = require('axios');
 const { sha256 } = require('js-sha256');
-const crypto = require('crypto');
-const crypto = require('crypto'); // Added for AES Encryption
+const crypto = require('crypto'); // FIX: Removed the duplicate crypto declaration
 const { IotaClient, getFullnodeUrl } = require('@iota/iota-sdk/client');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
@@ -206,13 +205,23 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
           from: process.env.EMAIL_FROM || 'onboarding@resend.dev', 
           to: email,
           subject: 'TrustCycle Verification Code',
-          html: `<p>Your verification code is: <strong>${otp}</strong></p>`
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 32px;">
+              <h2 style="color: #7B2D8B;">TrustCycle</h2>
+              <p>Your verification code is:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7B2D8B; padding: 16px 0;">
+                ${otp}
+              </div>
+              <p style="color: #666; font-size: 13px;">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>
+            </div>
+          `
         });
-        res.json({ success: true, message: "Email sent" });
+        res.json({ success: true, message: "Verification code sent to your email." });
     } else {
-        res.json({ success: true, message: "OTP logged to console (Dev Mode)" });
+        res.json({ success: true, message: "Dev mode: check server console for OTP." });
     }
   } catch (err) {
+    console.error("❌ Resend API Error:", err);
     res.status(500).json({ error: 'Failed to send email.' });
   }
 });
@@ -281,8 +290,16 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
-    // Guard against undefined params
-    if (!PACKAGE_ID || !PROTOCOL_CONFIG_ID) throw new Error("Missing Chain Config");
+    // FIX: Guard against undefined params to prevent BigInt error crash
+    console.log("DEBUG TRANSACTIONS ARGS:", {
+        PACKAGE_ID: PACKAGE_ID ? "SET" : "UNDEFINED",
+        PROTOCOL_CONFIG_ID: PROTOCOL_CONFIG_ID ? "SET" : "UNDEFINED",
+        authId: authId ? "SET" : "UNDEFINED"
+    });
+
+    if (!PACKAGE_ID) throw new Error("PACKAGE_ID is missing in Render Environment Variables.");
+    if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID is missing in Render Environment Variables.");
+    if (!authId || authId === 'undefined') throw new Error("AuthID is missing from the frontend request.");
 
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
