@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const axios = require('axios');
 const { sha256 } = require('js-sha256');
 const crypto = require('crypto');
+const crypto = require('crypto'); // Added for AES Encryption
 const { IotaClient, getFullnodeUrl } = require('@iota/iota-sdk/client');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
