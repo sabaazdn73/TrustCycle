@@ -4,10 +4,8 @@ version = "0.0.1"
 edition = "2024" 
 
 [dependencies]
-# Using the testnet
-Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "testnet" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "f91ea9443e62057912443493f9547d6e80b27b40" }
+
 
 [addresses]
 hackathon = "0x0"
-iota = "0x2"      
-std = "0x1"       
