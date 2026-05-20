@@ -10,12 +10,14 @@ const { Transaction } = require('@iota/iota-sdk/transactions');
 const { Resend } = require('resend');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 app.set('trust proxy', 1); // FIX: Required for Render to avoid X-Forwarded-For error
 app.use(express.json());
 app.use(cors());
-
+app.use(upload.single('file'));
 /* ======================================================
    0. ENCRYPTION UTILS (For Passport Privacy)
 ====================================================== */
