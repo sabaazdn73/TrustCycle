@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose')
 const axios = require('axios');
 const { sha256 } = require('js-sha256');
-const crypto = require('crypto'); // FIX: Removed the duplicate crypto declaration
+const crypto = require('crypto'); // FIX: Duplicate removed
 const { IotaClient, getFullnodeUrl } = require('@iota/iota-sdk/client');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
@@ -71,23 +71,24 @@ const RecSchema = new mongoose.Schema({
 const Recommendation = mongoose.model('Recommendation', RecSchema);
 
 /* ======================================================
-   1. IOTA + SERVICE SETUP
+   1. IOTA + SERVICE SETUP (FIX: Trim hidden spaces from Render)
 ====================================================== */
 const client = new IotaClient({ url: process.env.IOTA_NODE_URL || getFullnodeUrl('testnet') });
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const PACKAGE_ID = process.env.PACKAGE_ID;
-const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID; 
+const PACKAGE_ID = process.env.PACKAGE_ID ? process.env.PACKAGE_ID.trim() : undefined;
+const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID ? process.env.PROTOCOL_CONFIG_ID.trim() : undefined; 
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
 
-const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7";
+// توجه: اگر رو تست‌نت قرارداد جدید زدی، این آیدی هم ممکنه تغییر کرده باشه
+const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7".trim();
 
 if (!process.env.ISSUER_MNEMONIC) {
     console.error("❌ Error: ISSUER_MNEMONIC is missing in .env");
     process.exit(1);
 }
-const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ISSUER_MNEMONIC);
+const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ISSUER_MNEMONIC.trim());
 const adminAddress = adminKeypair.toIotaAddress();
 console.log(`🤖 Admin Address loaded: ${adminAddress}`);
 
@@ -285,26 +286,25 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const vcString = JSON.stringify(signedVc);
     const contentHash = sha256(vcString);
 
-    console.log("Creating IOTA Transaction...");
-    const tx = new Transaction();
-    const passportHash = sha256(passport); 
-    const encryptedPassport = encrypt(passport); 
-
-    // FIX: Guard against undefined params to prevent BigInt error crash
-    console.log("DEBUG TRANSACTIONS ARGS:", {
-        PACKAGE_ID: PACKAGE_ID ? "SET" : "UNDEFINED",
-        PROTOCOL_CONFIG_ID: PROTOCOL_CONFIG_ID ? "SET" : "UNDEFINED",
-        authId: authId ? "SET" : "UNDEFINED"
-    });
-
     if (!PACKAGE_ID) throw new Error("PACKAGE_ID is missing in Render Environment Variables.");
     if (!PROTOCOL_CONFIG_ID) throw new Error("PROTOCOL_CONFIG_ID is missing in Render Environment Variables.");
-    if (!authId || authId === 'undefined') throw new Error("AuthID is missing from the frontend request.");
+
+    console.log("Creating IOTA Transaction...");
+    const tx = new Transaction();
+    
+    // ---- THE MAGIC FIX FOR RENDER BIGINT ERROR ----
+    // این دو خط باعث میشن SDK دیگه برای Gas به شبکه ریکوئست نده و کرش نکنه
+    tx.setSender(adminAddress);
+    tx.setGasBudget(200000000); 
+    // -----------------------------------------------
+
+    const passportHash = sha256(passport); 
+    const encryptedPassport = encrypt(passport); 
 
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
       arguments: [
-        tx.object(authId),                               
+        tx.object(authId.trim()),                               
         tx.object(PROTOCOL_CONFIG_ID),                   
         tx.pure.vector('u8', stringToBytes(studentName)),
         tx.pure.vector('u8', hexToBytes(passportHash)),  
@@ -356,12 +356,17 @@ app.post('/api/revoke', async (req, res) => {
         if (!record) return res.status(404).json({error: "Record not found"});
         
         const tx = new Transaction();
+        
+        // ---- FIX APPLIED HERE AS WELL ----
+        tx.setSender(adminAddress);
+        tx.setGasBudget(100000000);
+        
         tx.moveCall({
             target: `${PACKAGE_ID}::recommendation::revoke_recommendation`,
             arguments: [
                 tx.object(ISSUER_AUTH_ID),         
                 tx.object(PROTOCOL_CONFIG_ID),     
-                tx.object(recId)                   
+                tx.object(recId.trim())                   
             ]
         });
 
