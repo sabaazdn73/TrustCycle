@@ -217,7 +217,8 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
         res.json({ success: true, message: "Dev mode: check server console for OTP." });
     }
   } catch (err) {
-    res.status(500).json({ error: 'Failed to send email.' });
+    console.error("❌ Resend API Error:", err);
+    res.status(500).json({ error: err.message || 'Failed to send email.' });
   }
 });
 
