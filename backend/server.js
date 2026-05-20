@@ -12,6 +12,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+app.set('trust proxy', 1); // FIX: Required for Render reverse proxy — fixes ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
 app.use(express.json());
 app.use(cors());
 
@@ -104,13 +105,11 @@ let otpStore = {};
 /* ======================================================
    2.5 RATE LIMITING
 ====================================================== */
-
 const otpLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
   max: 3,
   message: { error: 'Too many OTP requests. Please try again tomorrow.' }
 });
-
 
 const verifyLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -218,10 +217,8 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
             </div>
           `
         });
-        
         res.json({ success: true, message: "Verification code sent to your email." });
     } else {
-       
         res.json({ success: true, message: "Dev mode: check server console for OTP." });
     }
   } catch (err) {
@@ -294,7 +291,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const passportHash = sha256(passport); 
     const encryptedPassport = encrypt(passport); 
 
-    // No changes to logic, just proceeding with secure transaction
     tx.moveCall({
       target: `${PACKAGE_ID}::recommendation::issue_recommendation`,
       arguments: [
@@ -335,7 +331,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     res.json({ success: true, recId, txId: result.digest });
 
   } catch (e) {
-    console.error("Blockchain Error:", e.message); // Only log error message
+    console.error("Blockchain Error:", e.message);
     res.status(500).json({ error: "Transaction failed" });
   }
 });
@@ -450,7 +446,7 @@ app.get('/api/vc/:id', async (req, res) => {
 });
 
 /* ======================================================
-   8.6 PUBLIC CERTIFICATE API — HUMAN-READABLE WITH EXPLORER LINK
+   8.6 PUBLIC CERTIFICATE API
 ====================================================== */
 app.get('/api/certificate/:id', async (req, res) => {
   try {
@@ -458,7 +454,6 @@ app.get('/api/certificate/:id', async (req, res) => {
     const record = await Recommendation.findOne({ id });
     if (!record) return res.status(404).json({ error: 'Certificate not found' });
 
-    // on-chain status check
     let onChainActive = true;
     try {
       const onChainObj = await client.getObject({ id, options: { showContent: true } });
@@ -469,7 +464,6 @@ app.get('/api/certificate/:id', async (req, res) => {
       console.warn("On-chain check warning");
     }
 
-
     res.json({
       studentName: record.studentName,
       issuerName: record.issuerName,
@@ -479,7 +473,6 @@ app.get('/api/certificate/:id', async (req, res) => {
       txDigest: record.txDigest,
       timestamp: record.timestamp,
       status: onChainActive ? record.status : 'Revoked',
-
       content: record.content?.startsWith('file:') ? null : record.content,
       explorerUrl: `https://explorer.iota.org/object/${record.id}?network=testnet`
     });
