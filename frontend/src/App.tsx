@@ -191,7 +191,7 @@ export default function App() {
       formData.append('issuerEmail', emailInput);
       formData.append('issuerName', identity?.fullName || fullNameInput);
       formData.append('issuerUniversity', issuerUniversity); 
-      formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7");
+      formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef55ad7");
 
       if (pdfFile) {
         formData.append('file', pdfFile);
@@ -756,7 +756,7 @@ export default function App() {
                 <button 
                   style={{ ...buttonStyle('#c084fc'), marginTop: 15 }} 
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://trustcycle.tech/cert/${issuedRef}`);
+                    navigator.clipboard.writeText(`${window.location.origin}/cert/${issuedRef}`);
                     alert("🔗 Shareable Link Copied!");
                   }}
                 >
@@ -805,9 +805,11 @@ export default function App() {
                     <div style={{marginTop: 8, fontSize: 13, color: '#ccc'}}>
                       {r.content.startsWith('file:') ? "📄 PDF Document" : r.content.substring(0, 50) + "..."}
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
                       <button style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleVerifyId(r.id)}>View Details</button>
                       <button style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDownloadJSON(r.id)}>Download VC</button>
+                      {/* دکمه کپی لینک مستقیم برای دانشجو */}
+                      <button style={{ background: 'none', border: 'none', color: '#c084fc', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/cert/${r.id}`); alert('🔗 Shareable Link Copied!');}}>Copy Link</button>
                     </div>
                   </div>
                 ))}
@@ -835,7 +837,7 @@ export default function App() {
                         {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
                       </code>
                       <button 
-                        onClick={() => {navigator.clipboard.writeText(`https://trustcycle.tech/cert/${selectedRec.id}`); alert('🔗 Direct Link Copied!');}}
+                        onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/cert/${selectedRec.id}`); alert('🔗 Direct Link Copied!');}}
                         style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
                       >Copy Link</button>
                     </div>
