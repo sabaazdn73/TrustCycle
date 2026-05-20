@@ -3,22 +3,22 @@ const express = require('express');
 const mongoose = require('mongoose')
 const axios = require('axios');
 const { sha256 } = require('js-sha256');
-const crypto = require('crypto'); // Added for AES Encryption
+const crypto = require('crypto');
 const { IotaClient, getFullnodeUrl } = require('@iota/iota-sdk/client');
 const { Ed25519Keypair } = require('@iota/iota-sdk/keypairs/ed25519');
 const { Transaction } = require('@iota/iota-sdk/transactions');
 const { Resend } = require('resend');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 /* ======================================================
-   0. ENCRYPTION UTILS (For Passport Privacy)
+   0. ENCRYPTION UTILS
 ====================================================== */
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
-
 if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
     console.error("❌ Error: ENCRYPTION_KEY is missing or not exactly 32 characters in .env");
     process.exit(1);
@@ -44,7 +44,7 @@ function decrypt(text) {
 }
 
 /* ======================================================
-   0.1 DATABASE CONNECTION (MongoDB) 
+   0.1 DATABASE CONNECTION
 ====================================================== */
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas (Persistent Storage)'))
@@ -78,7 +78,6 @@ const PACKAGE_ID = process.env.PACKAGE_ID;
 const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID; 
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
-
 const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7";
 
 if (!process.env.ISSUER_MNEMONIC) {
@@ -96,7 +95,24 @@ let whitelist = ['s-sazadegan@ucp.pt', 'admin@trustcycle.edu'];
 let otpStore = {};
 
 /* ======================================================
-   3. HELPER: STRING TO BYTES
+   2.5 RATE LIMITING
+====================================================== */
+
+const otpLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 3,
+  message: { error: 'Too many OTP requests. Please try again tomorrow.' }
+});
+
+
+const verifyLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many requests. Please try again later.' }
+});
+
+/* ======================================================
+   3. HELPERS
 ====================================================== */
 const hexToBytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 const stringToBytes = (str) => new TextEncoder().encode(str);
@@ -151,7 +167,7 @@ app.post('/api/admin/whitelist', (req, res) => {
   res.json({ success: true, list: whitelist });
 });
 
-app.post('/api/auth/verify-email', async (req, res) => {
+app.post('/api/auth/verify-email', verifyLimiter, async (req, res) => {
   const { email, fullName } = req.body;
   if (!email || !fullName || email.trim() === '' || fullName.trim() ==='') {
     return res.status(400).json({ success: false, error: 'Please enter both Full Name and Academic Email.' })
@@ -171,7 +187,7 @@ app.post('/api/auth/verify-email', async (req, res) => {
   res.json({ success: true, identity, canProceed, history });
 });
 
-app.post('/api/auth/send-otp', async (req, res) => {
+app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
@@ -180,14 +196,25 @@ app.post('/api/auth/send-otp', async (req, res) => {
   try {
     if (process.env.RESEND_API_KEY) {
         await resend.emails.send({
-        from: process.env.EMAIL_FROM || 'onboarding@resend.dev', 
-        to: email,
-        subject: 'TrustCycle Verification Code',
-        html: `<p>Your verification code is: <strong>${otp}</strong></p>`
+          from: process.env.EMAIL_FROM || 'onboarding@resend.dev', 
+          to: email,
+          subject: 'TrustCycle Verification Code',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 32px;">
+              <h2 style="color: #7B2D8B;">TrustCycle</h2>
+              <p>Your verification code is:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7B2D8B; padding: 16px 0;">
+                ${otp}
+              </div>
+              <p style="color: #666; font-size: 13px;">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>
+            </div>
+          `
         });
-        res.json({ success: true, message: "Email sent", demoOTP: otp });
+        
+        res.json({ success: true, message: "Verification code sent to your email." });
     } else {
-        res.json({ success: true, message: "OTP logged to console (Dev Mode)", demoOTP: otp });
+       
+        res.json({ success: true, message: "Dev mode: check server console for OTP." });
     }
   } catch (err) {
     res.status(500).json({ error: 'Failed to send email.' });
@@ -202,11 +229,11 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 /* ======================================================
-   6. ISSUE RECOMMENDATION (ON-CHAIN) - Supporting Text & PDF
+   6. ISSUE RECOMMENDATION (ON-CHAIN)
 ===================================================== */
 const multer = require('multer');
-const storage = multer.memoryStorage(); // store temporary to convert Base64
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const storageEngine = multer.memoryStorage();
+const upload = multer({ storage: storageEngine, limits: { fileSize: 5 * 1024 * 1024 } });
 
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
@@ -222,10 +249,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: "Missing required fields (Name, Passport, and Recommendation Content/File)" });
     }
 
-    const dateIssued = new Date().toISOString();
-    /* ======================================================
-       VC GENERATION + NATIVE Ed25519 SIGNING (Move-Compatible)
-    ====================================================== */
     const vcPayload = {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
         "type": ["VerifiableCredential", "AcademicRecommendation"],
@@ -239,7 +262,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
         }
     };
 
-    // Native Signing using the Ed25519Keypair
     const payloadString = JSON.stringify(vcPayload);
     const messageBytes = new TextEncoder().encode(payloadString);
     const { signature } = await adminKeypair.signPersonalMessage(messageBytes);
@@ -256,11 +278,7 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     };
 
     const vcString = JSON.stringify(signedVc);
-    const contentHash = sha256(vcString); //Hasing entire VC for on-cain reference
-
-    /* ======================================================
-       IOTA TRANSACTION
-    ====================================================== */
+    const contentHash = sha256(vcString);
 
     console.log("Creating IOTA Transaction...");
     const tx = new Transaction();
@@ -413,8 +431,6 @@ app.get('/api/vc/:id', async (req, res) => {
     };
 
     res.setHeader('Content-Type', 'application/json');
-    
-    //send record.vc
     res.json(portableCredential); 
 
   } catch (e) {
@@ -423,10 +439,49 @@ app.get('/api/vc/:id', async (req, res) => {
   }
 });
 
+/* ======================================================
+   8.6 PUBLIC CERTIFICATE API — HUMAN-READABLE WITH EXPLORER LINK
+====================================================== */
+app.get('/api/certificate/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const record = await Recommendation.findOne({ id });
+    if (!record) return res.status(404).json({ error: 'Certificate not found' });
+
+    // on-chain status check
+    let onChainActive = true;
+    try {
+      const onChainObj = await client.getObject({ id, options: { showContent: true } });
+      if (onChainObj.data?.content?.fields) {
+        onChainActive = onChainObj.data.content.fields.active;
+      }
+    } catch (chainErr) {
+      console.warn("On-chain check failed:", chainErr.message);
+    }
+
+
+    res.json({
+      studentName: record.studentName,
+      issuerName: record.issuerName,
+      issuerUniversity: record.issuerUniversity || null,
+      objectId: record.id,
+      contentHash: record.contentHash,
+      txDigest: record.txDigest,
+      timestamp: record.timestamp,
+      status: onChainActive ? record.status : 'Revoked',
+
+      content: record.content?.startsWith('file:') ? null : record.content,
+      explorerUrl: `https://explorer.iota.org/object/${record.id}?network=testnet`
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to load certificate' });
+  }
+});
+
 /* ====================================================
    9. SERVER START
 ====================================================== */
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0' , () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 TrustCycle Backend live on port ${PORT}`);
 });
