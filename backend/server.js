@@ -81,7 +81,6 @@ const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID ? process.env.PROTOCOL
 const ADMIN_SECRET = process.env.ADMIN_ACCESS_KEY || 'Fendi';
 const SERP_API_KEY = process.env.SERP_API_KEY;
 
-// توجه: اگر رو تست‌نت قرارداد جدید زدی، این آیدی هم ممکنه تغییر کرده باشه
 const ISSUER_AUTH_ID = "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef65ad7".trim();
 
 if (!process.env.ISSUER_MNEMONIC) {
@@ -293,7 +292,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const tx = new Transaction();
     
     // ---- THE MAGIC FIX FOR RENDER BIGINT ERROR ----
-    // این دو خط باعث میشن SDK دیگه برای Gas به شبکه ریکوئست نده و کرش نکنه
     tx.setSender(adminAddress);
     tx.setGasBudget(200000000); 
     // -----------------------------------------------
@@ -306,9 +304,9 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
       arguments: [
         tx.object(authId.trim()),                               
         tx.object(PROTOCOL_CONFIG_ID),                   
-        tx.pure.vector('u8', stringToBytes(studentName)),
-        tx.pure.vector('u8', hexToBytes(passportHash)),  
-        tx.pure.vector('u8', hexToBytes(contentHash)),   
+        tx.pure(stringToBytes(studentName), 'vector<u8>'),
+        tx.pure(hexToBytes(passportHash), 'vector<u8>'),
+        tx.pure(hexToBytes(contentHash), 'vector<u8>'),
         tx.object('0x6')                                 
       ]
     });
