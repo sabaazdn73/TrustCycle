@@ -809,7 +809,7 @@ export default function App() {
                     <div style={{ display: 'flex', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
                       <button style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleVerifyId(r.id)}>View Details</button>
                       <button style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDownloadJSON(r.id)}>Download VC</button>
-                      {/* دکمه کپی لینک مستقیم برای دانشجو */}
+                     
                       <button style={{ background: 'none', border: 'none', color: '#c084fc', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/cert/${r.id}`); alert('🔗 Shareable Link Copied!');}}>Copy Link</button>
                     </div>
                   </div>
@@ -843,8 +843,19 @@ export default function App() {
                       >Copy Link</button>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                      <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download VC (JSON)</button>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}}
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/cert/${selectedRec.id}`);
+                          alert('🔗 Shareable Link Copied!');
+                        }}
+                      >
+                        ⬇️ Copy Shareable Link
+                      </button>
+                      <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>
+                        📥 Download VC JSON
+                      </button>
                       
                       {selectedRec.content.startsWith('file:') && selectedRec.status === 'Verified' && (
                         <button 
