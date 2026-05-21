@@ -192,8 +192,6 @@ export default function App() {
       formData.append('issuerName', identity?.fullName || fullNameInput);
       formData.append('issuerUniversity', issuerUniversity); 
       
-      // authId از اینجا حذف شد تا در بک‌اِند مستقیماً از فایل env. خوانده شود
-
       if (pdfFile) {
         formData.append('file', pdfFile);
       } else {
@@ -810,7 +808,15 @@ export default function App() {
                       <button style={{ background: 'none', border: 'none', color: THEME.accent, fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleVerifyId(r.id)}>View Details</button>
                       <button style={{ background: 'none', border: 'none', color: '#4ade80', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDownloadJSON(r.id)}>Download VC</button>
                      
-                      <button style={{ background: 'none', border: 'none', color: '#c084fc', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/cert/${r.id}`); alert('🔗 Shareable Link Copied!');}}>Copy Link</button>
+                      {/* اصلاح شده: کپی آیدی رکورد به جای آدرس URL */}
+                      <button 
+                        style={{ background: 'none', border: 'none', color: '#c084fc', fontSize: 12, cursor: 'pointer', fontWeight: 'bold' }} 
+                        onClick={() => {
+                          navigator.clipboard.writeText(r.id); 
+                          alert('🆔 Reference ID Copied!');
+                        }}>
+                          Copy Ref ID
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -837,10 +843,16 @@ export default function App() {
                       <code style={{fontSize: 12, color: THEME.accent}}>
                         {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
                       </code>
+                      {/* اصلاح شده: کپی آیدی رکورد به جای آدرس URL */}
                       <button 
-                        onClick={() => {navigator.clipboard.writeText(`${window.location.origin}/cert/${selectedRec.id}`); alert('🔗 Direct Link Copied!');}}
                         style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
-                      >Copy Link</button>
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRec.id);
+                          alert('🆔 Reference ID Copied!');
+                        }}
+                        >
+                          Copy Ref ID
+                      </button>
                     </div>
                     
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -883,16 +895,49 @@ export default function App() {
             {selectedRec && (
               <div style={{ marginTop: '24px', width: '100%', textAlign: 'center' }}>
                 <Certificate data={selectedRec} />
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>⬇️ Download Official VC</button>
-                    {selectedRec.content.startsWith('file:') && selectedRec.status === 'Verified' && (
-                        <button 
-                            style={{...buttonStyle('#22c55e'), width: 'auto', padding: '10px 15px'}} 
-                            onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
+                
+                {/* تغییر مشابه در پنل دانشگاه برای یکپارچگی */}
+                <div style={{ borderTop: '1px solid #222', paddingTop: 12, marginTop: 15 }}>
+                    <p style={{fontSize: 10, color: '#666', margin: '0 0 4px 0'}}>REFERENCE ID</p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10 }}>
+                      <code style={{fontSize: 12, color: THEME.accent}}>
+                        {selectedRec.id.slice(0, 8)}...{selectedRec.id.slice(-6)}
+                      </code>
+                      <button 
+                        style={{ background: '#222', border: 'none', color: '#888', fontSize: 9, borderRadius: 4, padding: '2px 6px', cursor: 'pointer' }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedRec.id);
+                          alert('🆔 Reference ID Copied!');
+                        }}
                         >
-                            📥 Download Official PDF
+                          Copy Ref ID
+                      </button>
+                    </div>
+
+                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}}
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/cert/${selectedRec.id}`);
+                            alert('🔗 Shareable Link Copied!');
+                          }}
+                        >
+                          ⬇️ Copy Shareable Link
                         </button>
-                    )}
+                        
+                        <button style={{...buttonStyle(), width: 'auto', padding: '10px 15px'}} onClick={() => handleDownloadJSON(selectedRec.id)}>
+                          ⬇️ Download Official VC
+                        </button>
+
+                        {selectedRec.content.startsWith('file:') && selectedRec.status === 'Verified' && (
+                            <button 
+                                style={{...buttonStyle('#22c55e'), width: 'auto', padding: '10px 15px'}} 
+                                onClick={() => downloadPdfFromBase64(selectedRec.content, `Recommendation_${selectedRec.studentName}.pdf`)}
+                            >
+                                📥 Download Official PDF
+                            </button>
+                        )}
+                    </div>
                 </div>
               </div>
             )}
