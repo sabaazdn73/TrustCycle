@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root { --brand-purple: #7e22ce; }
+        body { font-family: 'Inter', -apple-system, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 40px auto; padding: 40px; background: #f8fafc; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        /* Branding Design */
+        .brand-mark { width: 60px; height: 60px; background: var(--brand-purple); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; border-radius: 50%; margin: 0 auto 20px; box-shadow: 0 4px 10px rgba(126,34,206,0.3); }
+        h1 { text-align: center; color: #1e293b; margin-bottom: 30px; }
+        
+        h2 { color: var(--brand-purple); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 30px; }
+        .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--brand-purple); }
+        
+        .cta-box { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
+        .btn { padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; transition: 0.3s; }
+        .btn-main { background: var(--brand-purple); color: white; }
+        .btn-sec { background: #e2e8f0; color: #475569; }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        
+        footer { margin-top: 40px; text-align: center; font-size: 0.9rem; color: #64748b; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="brand-mark">TC</div>
+    <h1>TrustCycle</h1>
+
+    <div class="section">
+        <h2>The Common Challenge</h2>
+        <p>A tedious cycle of requesting and waiting for recommendation letters is frequently observed. It is understood that academic endorsements are often trapped in manual, repetitive processes.</p>
+    </div>
+
+    <div class="section">
+        <h2>The Universal Approach</h2>
+        <p>With TrustCycle, an endorsement is requested once and utilized for any objective—be it academic admissions, professional career opportunities, or personal goals. The recommendation is cryptographically verified and kept under full user control.</p>
+    </div>
+
+    <div class="cta-box">
+        <a href="https://trust-cycle-drs.vercel.app/" class="btn btn-sec">Explore the system demo</a>
+        <a href="https://trustcycle.tech" class="btn btn-main">Request an Endorsement from your supervisor</a>
+    </div>
+
+    <footer>
+        If this project is found to be of interest, a reply is invited to facilitate a further discussion.
+    </footer>
+</body>
+</html>
