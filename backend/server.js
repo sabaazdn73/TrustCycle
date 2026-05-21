@@ -16,7 +16,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ['https://trustcycle.onrender.com', 'https://trustcycle.tech'],
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 
 /* ======================================================
    0. ENCRYPTION UTILS (For Passport Privacy)
