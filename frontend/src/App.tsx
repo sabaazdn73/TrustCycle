@@ -191,7 +191,8 @@ export default function App() {
       formData.append('issuerEmail', emailInput);
       formData.append('issuerName', identity?.fullName || fullNameInput);
       formData.append('issuerUniversity', issuerUniversity); 
-      formData.append('authId', "0x823e7925487a829195d2693a8be96c9dacfb505220a503ac176cf06deef55ad7");
+      
+      // authId از اینجا حذف شد تا در بک‌اِند مستقیماً از فایل env. خوانده شود
 
       if (pdfFile) {
         formData.append('file', pdfFile);

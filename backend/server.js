@@ -82,6 +82,7 @@ const Recommendation = mongoose.model('Recommendation', RecSchema);
 const client = new IotaClient({ url: process.env.IOTA_NODE_URL || getFullnodeUrl('testnet') });
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// ✅ SAFE ENVIRONMENT VARIABLE LOADING
 const PACKAGE_ID = process.env.PACKAGE_ID ? process.env.PACKAGE_ID.trim() : undefined;
 const PROTOCOL_CONFIG_ID = process.env.PROTOCOL_CONFIG_ID ? process.env.PROTOCOL_CONFIG_ID.trim() : undefined; 
 const ISSUER_AUTH_ID = process.env.ISSUER_AUTH_ID ? process.env.ISSUER_AUTH_ID.trim() : undefined;
@@ -126,6 +127,12 @@ const verifyLimiter = rateLimit({
 ====================================================== */
 const hexToBytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 const stringToBytes = (str) => new TextEncoder().encode(str);
+
+// Helper for Safe Hex IDs
+const ensureHex = (str) => {
+    if (!str) return "0x0000000000000000000000000000000000000000000000000000000000000000";
+    return str.trim().startsWith('0x') ? str.trim() : `0x${str.trim()}`;
+};
 
 /* ======================================================
    4. IDENTITY LOOKUP
@@ -201,7 +208,10 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
   const { email } = req.body;
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
-  console.log(`🔐 OTP Generated for email: ${email}`);
+  
+  // برای محیط Production لاگ کردنِ OTP را حذف کن تا امنیت حفظ شود. 
+  // در صورت نیاز به دیباگ در سرور، فقط از لاگِ ارسال استفاده کن.
+  console.log(`✉️ Sending Verification Code for email: ${email}`);
 
   try {
     if (process.env.RESEND_API_KEY) {
@@ -222,7 +232,7 @@ app.post('/api/auth/send-otp', otpLimiter, async (req, res) => {
         });
         res.json({ success: true, message: "Verification code sent to your email." });
     } else {
-        res.json({ success: true, message: "Dev mode: check server console for OTP." });
+        res.json({ success: true, message: "Dev mode: Email sending bypassed (No RESEND_API_KEY)." });
     }
   } catch (err) {
     console.error("❌ Resend API Error:", err);
@@ -242,7 +252,14 @@ app.post('/api/auth/verify-otp', (req, res) => {
 ===================================================== */
 app.post('/api/issue', upload.single('file'), async (req, res) => {
   try {
-    let { authId, studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
+    let { studentName, passport, content, issuerEmail, issuerName, issuerUniversity } = req.body;
+
+    // ✅ READ AUTH ID DIRECTLY FROM ENVIRONMENT (SECURE)
+    const authId = ISSUER_AUTH_ID;
+
+    if (!authId || !PACKAGE_ID || !PROTOCOL_CONFIG_ID) {
+        return res.status(500).json({ error: "Server Configuration Error: Missing critical IOTA configuration in backend (.env)." });
+    }
 
     // لایه محافظتی برای پر کردنِ مقادیر خالی با مقادیر پیش‌فرض
     const safeStudentName = (studentName && studentName.trim() !== "") ? studentName : "N/A";
@@ -250,16 +267,14 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const safeContent = (content && content.trim() !== "") ? content : "No Content Provided";
     const safeIssuerUniversity = (issuerUniversity && issuerUniversity.trim() !== "") ? issuerUniversity : "N/A";
 
-    // اطمینان از فرمت Hex برای آیدی‌ها
-    const ensureHex = (str) => {
-        if (!str) return "0x0000000000000000000000000000000000000000000000000000000000000000";
-        return str.trim().startsWith('0x') ? str.trim() : `0x${str.trim()}`;
-    };
-
     let finalContent = safeContent;
     if (req.file) {
       const base64Data = req.file.buffer.toString('base64');
       finalContent = `file:${req.file.mimetype};base64,${base64Data}`;
+    }
+
+    if (!safeStudentName || !safePassport || !finalContent) {
+        return res.status(400).json({ error: "Missing required fields (Name, Passport, and Recommendation Content/File)" });
     }
 
     /* ======================================================
@@ -304,7 +319,6 @@ app.post('/api/issue', upload.single('file'), async (req, res) => {
     const passportHash = sha256(safePassport); 
     const encryptedPassport = encrypt(safePassport); 
 
-    // تنظیم بودجه گاز با مقدار ثابت BigInt
     tx.setSender(adminAddress);
     tx.setGasBudget(BigInt(500000000)); 
 
@@ -365,7 +379,9 @@ app.post('/api/revoke', async (req, res) => {
         const record = await Recommendation.findOne({ id: recId });
         if (!record) return res.status(404).json({error: "Record not found"});
         
-        const ensureHex = (str) => (str.startsWith('0x') ? str : `0x${str}`);
+        if (!ISSUER_AUTH_ID || !PACKAGE_ID || !PROTOCOL_CONFIG_ID) {
+             return res.status(500).json({ error: "Server Configuration Error: Missing critical IOTA configuration." });
+        }
         
         const tx = new Transaction();
         tx.setSender(adminAddress);
@@ -374,8 +390,8 @@ app.post('/api/revoke', async (req, res) => {
         tx.moveCall({
             target: `${ensureHex(PACKAGE_ID)}::recommendation::revoke_recommendation`,
             arguments: [
-                tx.object(ensureHex(ISSUER_AUTH_ID.trim())),         
-                tx.object(ensureHex(PROTOCOL_CONFIG_ID.trim())),     
+                tx.object(ensureHex(ISSUER_AUTH_ID)),         
+                tx.object(ensureHex(PROTOCOL_CONFIG_ID)),     
                 tx.object(recId.trim())                   
             ]
         });
