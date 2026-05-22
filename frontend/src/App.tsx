@@ -530,36 +530,7 @@ export default function App() {
           marginTop: isMobile ? '12px' : '0'
         }}>
           
-          <a 
-            href="/final-report.html" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              background: 'rgba(147, 51, 234, 0.08)', 
-              border: `1px solid rgba(147, 51, 234, 0.5)`, 
-              color: '#d8b4fe',
-              padding: '0 12px',
-              height: '30px',
-              boxSizing: 'border-box',
-              borderRadius: '100px', 
-              textDecoration: 'none',
-              fontSize: '0.75rem',    
-              fontWeight: 500, 
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '135px', 
-              gap: '6px',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
-            </svg>
-            FINAL REPORT
-          </a>
-
+     
           <a 
             href="/TrustCycle_Litepaper.pdf" 
             target="_blank" 
@@ -588,6 +559,36 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             LITEPAPER
+          </a>
+
+          <a 
+            href="https://sabaazdn73.github.io/TrustCycle/catalog.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(147, 51, 234, 0.08)', 
+              border: `1px solid rgba(147, 51, 234, 0.5)`, 
+              color: '#d8b4fe',
+              padding: '0 12px',
+              height: '30px',
+              boxSizing: 'border-box',
+              borderRadius: '100px', 
+              textDecoration: 'none',
+              fontSize: '0.75rem',    
+              fontWeight: 500, 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '135px', 
+              gap: '6px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clipRule="evenodd" />
+            </svg>
+            CATALOG
           </a>
 
           <a 
