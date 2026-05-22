@@ -481,8 +481,8 @@ export default function App() {
           </h1>
         </div>
         <p style={{ fontSize: '0.95rem', color: '#aaa', marginTop: '4px', fontWeight: 300 }}>
-          Decentralized Recommendation System <br />
-          <span style={{ fontSize: '0.75rem', opacity: 0.6, letterSpacing: 1 }}>An On-Chain Solution for Academia Based on the IOTA Trust Framework v0.1</span>
+          Decentralized Recommendation System - BETA PILOT <br />
+          <span style={{ fontSize: '0.75rem', opacity: 0.6, letterSpacing: 1 }}>An On-Chain Solution for Academia Based on the IOTA Trust Framework</span>
         </p>
       </div>
 
