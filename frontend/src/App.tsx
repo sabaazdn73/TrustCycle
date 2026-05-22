@@ -590,6 +590,37 @@ export default function App() {
             LITEPAPER
           </a>
 
+          <a 
+            href="https://trust-cycle-drs.vercel.app" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(147, 51, 234, 0.08)', 
+              border: `1px solid rgba(147, 51, 234, 0.5)`, 
+              color: '#d8b4fe',
+              padding: '0 12px',
+              height: '30px',
+              boxSizing: 'border-box',
+              borderRadius: '100px', 
+              textDecoration: 'none',
+              fontSize: '0.75rem',    
+              fontWeight: 500, 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: isMobile ? 'auto' : '135px',
+              flex: isMobile ? 1 : 'none',
+              gap: '6px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            DEMO VERSION
+          </a>
+
         </div>
       </div>
       
