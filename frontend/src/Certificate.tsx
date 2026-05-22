@@ -1,19 +1,20 @@
-import './Certificate.css';
-
 export default function Certificate({ data }: any) {
   if (!data) return null;
 
-  
   const issueDate = new Date(data.timestamp).toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric'
   }).toUpperCase();
 
-  
   const avatarLetters = data.issuerName ? data.issuerName.substring(0, 2).toUpperCase() : 'TC';
 
   return (
     <div className="certificate-wrapper">
       <div className="certificate">
+        
+        {/* BETA BANNER - Added here */}
+        <div className="beta-banner">
+          <strong>BETA PILOT PHASE</strong> · Issuer identity is rigorously verified via Google API against reputable academic sources.
+        </div>
 
         {/* TOP BANNER */}
         <div className="top-banner">

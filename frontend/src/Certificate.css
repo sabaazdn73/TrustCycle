@@ -81,3 +81,20 @@
 .footer-date { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
 .footer-tx { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(201,168,76,0.6); }
 .export-note { text-align: center; margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 1px; }
+/* Beta Banner Style */
+.beta-banner {
+  background: rgba(201, 168, 76, 0.08); /* رنگ ملایم طلایی */
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  padding: 10px 48px;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--gold-dark);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.beta-banner strong {
+  color: var(--purple);
+  font-weight: 700;
+}
