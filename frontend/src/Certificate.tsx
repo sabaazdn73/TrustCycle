@@ -1,3 +1,4 @@
+import './Certificate.css';
 export default function Certificate({ data }: any) {
   if (!data) return null;
 
