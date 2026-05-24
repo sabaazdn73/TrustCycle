@@ -1020,14 +1020,14 @@ export default function App() {
         <p style={{ fontSize: '11px', color: '#817d7de9', margin: 0, fontFamily: 'monospace' }}>
           Crafted by <a href="https://www.linkedin.com/in/saba-azadegan-2974b622a" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Saba Azadegan</a>
          {' '}for{' '}
-          <a href="https://blog.iota.org/masterz-hackathon" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>MasterZ*IOTA</a>
+          <a href="https://blog.iota.org/build-now-masterz-hackathon/#:~:text=TrustCycle%20–%20On%20chain%20academic%20recommendations" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>MasterZ*IOTA</a>
           {' '}Hackathon 2026.
         </p>
         
         <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace', textAlign: 'center'}}>
           <a href="https://drive.google.com/drive/folders/1rtBrhNahC8Na8NPhuNywd6xPCAXNeStK?usp=sharing" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>Docs</a>
           {' . '}
-          <a href="https://github.com/sabaazdn73/TrustCycle-DRS" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
+          <a href="https://github.com/sabaazdn73/TrustCycle" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}>GitHub</a>
           {' .'}
           <TechnicalAssistant />
         </p>
