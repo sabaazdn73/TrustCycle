@@ -88,3 +88,15 @@
 .footer-right { text-align: right; }
 .footer-date { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
 .footer-tx { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(201,168,76,0.6); }
+
+/* Export Note - Bottom Gradient Bar */
+.export-note { 
+  background: linear-gradient(90deg, var(--gold-dark) 0%, var(--purple) 50%, #1a0d36 100%); 
+  padding: 10px 48px; 
+  text-align: center; 
+  font-family: 'DM Mono', monospace; 
+  font-size: 10px; 
+  color: rgba(255,255,255,0.3); 
+  letter-spacing: 1.5px; 
+  text-transform: uppercase; 
+}

@@ -49,7 +49,7 @@ export default function Certificate({ data }: any) {
             <div className="this-certifies">This credential certifies that</div>
             <div className="student-name">{data.studentName}</div>
             <div className="student-id-row">
-              {/* تغییر مهم: نمایش شماره پاسپورت به جای هش */}
+              {/* نمایش شماره پاسپورت به صورت دیکریپت شده و شفاف */}
               <span>Passport · {data.passport || 'PT123456789'}</span>
               <div className="id-dot"></div>
               <span>Reference Verified · {issueDateShort}</span>
@@ -70,7 +70,7 @@ export default function Certificate({ data }: any) {
             <div className="issuer-info">
               <div className="issuer-label">Issuing Professor · Identity Verified</div>
               <div className="issuer-name">{data.issuerName || 'Authorized Issuer'}</div>
-              {/* یکپارچه کردن ایمیل و نام دانشگاه در یک خط */}
+              {/* یکپارچه کردن ایمیل و نام دانشگاه */}
               <div className="issuer-email">
                 {data.issuerEmail} {data.issuerUniversity ? ` · ${data.issuerUniversity}` : ''}
               </div>
@@ -81,7 +81,7 @@ export default function Certificate({ data }: any) {
             </div>
           </div>
 
-          {/* Data fields - گرید اطلاعات با جزئیات کامل */}
+          {/* Data fields */}
           <div className="data-grid">
             
             {/* زمان دقیق صدور */}
@@ -140,6 +140,11 @@ export default function Certificate({ data }: any) {
             <div className="footer-date">Issued · {issueDateShort}</div>
             <div className="footer-tx">TX · verify at explorer.iota.org</div>
           </div>
+        </div>
+
+        {/* EXPORT NOTE / BOTTOM GRADIENT BAR */}
+        <div className="export-note">
+          trustcycle · verified on IOTA Rebased · independently verifiable
         </div>
 
       </div>
