@@ -3,11 +3,9 @@ import './Certificate.css';
 export default function Certificate({ data }: any) {
   if (!data) return null;
 
-  // تولید تاریخ‌های استاندارد
   const dateObj = data.timestamp ? new Date(data.timestamp) : new Date();
   const issueDateShort = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
   
-  // تولید زمان دقیق (مثال: 24 Apr 2026 · 21:13 GMT+1)
   const timeString = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   const dateFormatted = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   const issueDateDetailed = `${dateFormatted} · ${timeString} GMT+1`;
@@ -49,7 +47,6 @@ export default function Certificate({ data }: any) {
             <div className="this-certifies">This credential certifies that</div>
             <div className="student-name">{data.studentName}</div>
             <div className="student-id-row">
-              {/* نمایش شماره پاسپورت به صورت دیکریپت شده و شفاف */}
               <span>Passport · {data.passport || 'PT123456789'}</span>
               <div className="id-dot"></div>
               <span>Reference Verified · {issueDateShort}</span>
@@ -70,7 +67,6 @@ export default function Certificate({ data }: any) {
             <div className="issuer-info">
               <div className="issuer-label">Issuing Professor · Identity Verified</div>
               <div className="issuer-name">{data.issuerName || 'Authorized Issuer'}</div>
-              {/* یکپارچه کردن ایمیل و نام دانشگاه */}
               <div className="issuer-email">
                 {data.issuerEmail} {data.issuerUniversity ? ` · ${data.issuerUniversity}` : ''}
               </div>
@@ -84,13 +80,13 @@ export default function Certificate({ data }: any) {
           {/* Data fields */}
           <div className="data-grid">
             
-            {/* زمان دقیق صدور */}
+            
             <div className="data-field">
               <div className="field-label">Issued At</div>
               <div className="field-value">{issueDateDetailed}</div>
             </div>
 
-            {/* وضعیت */}
+           
             <div className="data-field">
               <div className="field-label">Status</div>
               <div className="field-value" style={{ color: 'var(--verified)' }}>
@@ -98,13 +94,13 @@ export default function Certificate({ data }: any) {
               </div>
             </div>
 
-            {/* نوع گواهی */}
+           
             <div className="data-field">
               <div className="field-label">Credential Type</div>
               <div className="field-value">AcademicRecommendation · W3C VC</div>
             </div>
 
-            {/* امضای رمزنگاری */}
+            
             <div className="data-field">
               <div className="field-label">Signature</div>
               <div className="field-value" style={{ color: 'var(--verified)' }}>
@@ -112,13 +108,13 @@ export default function Certificate({ data }: any) {
               </div>
             </div>
 
-            {/* آی‌دی بلاکچین */}
+            
             <div className="data-field full-width">
               <div className="field-label">On-Chain Object ID (IOTA Rebased Testnet)</div>
               <div className="field-value mono">{data.id}</div>
             </div>
 
-            {/* هش محتوا */}
+            
             {data.contentHash && (
               <div className="data-field full-width">
                 <div className="field-label">Content Hash (SHA-256)</div>
