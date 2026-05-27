@@ -1033,13 +1033,13 @@ export default function App() {
         </p>
 
         <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace', textAlign: 'center'}}>
-          <a href="https://youtu.be/OXa0zkTi3Vs" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> Demo Walkthrough </a>
-          </p>
+          FEEDBACK/HELP?{' '}
+          <a href="mailto:saba@trustcycle.tech" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> Contact Me </a>
+        </p>
 
         <p style={{ fontSize: '11px', color: '#817d7de9', margin: '6px 0 0', fontFamily: 'monospace', textAlign: 'center'}}>
-          FEEDBACK/HELP?{' '}
-          <a href="saba@trustcycle.tech" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> Contact Me </a>
-          </p>
+          <a href="https://youtu.be/OXa0zkTi3Vs" target="_blank" style={{ fontWeight: 'bold', color: '#8c8a8ac7', textDecoration: 'none', borderBottom: '1px dotted #7e7d7d' }}> Demo Walkthrough </a>
+        </p>
 
       </div>
       </>
